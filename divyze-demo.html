@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Divyze — A Device for Potential</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #0f0f0f;
+    --border: rgba(255,255,255,0.07);
+    --accent: #e8ff47;
+    --accent2: #00f0c8;
+    --text: #f0f0f0;
+    --muted: #555;
+    --dimmed: #333;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    position: fixed; width: 10px; height: 10px;
+    background: var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+  }
+  .cursor-ring {
+    position: fixed; width: 36px; height: 36px;
+    border: 1px solid rgba(232,255,71,0.4);
+    border-radius: 50%; pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.2s, height 0.2s;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.4rem 4rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem; letter-spacing: 0.2em;
+    color: var(--accent); text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.12em;
+    padding: 0.5rem 1.2rem;
+    border: 1px solid var(--accent);
+    color: var(--accent); background: transparent;
+    text-decoration: none; text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent); color: var(--bg); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    padding: 0 4rem;
+    position: relative; overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-tag::before { content: '[ '; } .hero-tag::after { content: ' ]'; }
+
+  h1.hero-title {
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-weight: 800; line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    opacity: 0; animation: fadeUp 0.9s 0.4s forwards;
+  }
+  h1.hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem; line-height: 1.8;
+    color: var(--muted); max-width: 480px;
+    margin-top: 2rem;
+    opacity: 0; animation: fadeUp 0.9s 0.6s forwards;
+  }
+
+  .hero-actions {
+    display: flex; gap: 1.2rem; margin-top: 3rem;
+    opacity: 0; animation: fadeUp 0.9s 0.8s forwards;
+  }
+  .btn-primary {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.12em;
+    padding: 0.9rem 2rem; text-transform: uppercase;
+    background: var(--accent); color: var(--bg);
+    border: none; text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(232,255,71,0.25); }
+  .btn-ghost {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.12em;
+    padding: 0.9rem 2rem; text-transform: uppercase;
+    background: transparent; color: var(--text);
+    border: 1px solid var(--dimmed); text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--text); }
+
+  .hero-scroll {
+    position: absolute; bottom: 2.5rem; left: 4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 1rem;
+    opacity: 0; animation: fadeUp 1s 1.2s forwards;
+  }
+  .hero-scroll::before {
+    content: ''; display: block;
+    width: 40px; height: 1px; background: var(--dimmed);
+  }
+
+  .hero-stat {
+    position: absolute; right: 4rem; bottom: 3rem;
+    text-align: right;
+    opacity: 0; animation: fadeUp 1s 1s forwards;
+  }
+  .hero-stat-num {
+    font-size: 3.5rem; font-weight: 800; line-height: 1;
+    color: var(--accent);
+  }
+  .hero-stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* SECTION BASE */
+  section { padding: 7rem 4rem; position: relative; }
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 1rem;
+  }
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800; line-height: 1.05;
+    letter-spacing: -0.02em; max-width: 700px;
+  }
+  .section-title span { color: var(--accent); }
+
+  /* DIVIDER */
+  .divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 30%, var(--border) 70%, transparent);
+  }
+
+  /* WHAT WE DO */
+  #services { background: var(--surface); }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    margin-top: 4rem;
+    border: 1px solid var(--border);
+  }
+  .service-card {
+    padding: 2.5rem 2rem;
+    border-right: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: background 0.3s;
+  }
+  .service-card:last-child { border-right: none; }
+  .service-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .service-card:hover { background: rgba(232,255,71,0.03); }
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; color: var(--muted);
+    letter-spacing: 0.1em; margin-bottom: 2rem;
+  }
+  .service-icon {
+    font-size: 1.8rem; margin-bottom: 1.5rem;
+    display: block;
+  }
+  .service-name {
+    font-size: 1rem; font-weight: 700;
+    margin-bottom: 0.8rem; line-height: 1.2;
+  }
+  .service-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem; line-height: 1.7;
+    color: var(--muted);
+  }
+
+  /* HOW WE THINK */
+  #process { background: var(--bg); }
+  .process-wrapper {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6rem; align-items: center; margin-top: 4rem;
+  }
+  .process-steps { display: flex; flex-direction: column; gap: 0; }
+  .process-step {
+    display: grid; grid-template-columns: 60px 1fr;
+    gap: 1.5rem; padding: 2rem 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .process-step:first-child { border-top: 1px solid var(--border); }
+  .step-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted);
+    padding-top: 0.2rem;
+  }
+  .step-content h3 {
+    font-size: 1.15rem; font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .step-content p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem; line-height: 1.7; color: var(--muted);
+  }
+  .step-accent { color: var(--accent); }
+  .step-accent2 { color: var(--accent2); }
+
+  .process-visual {
+    position: relative; height: 420px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .device-box {
+    width: 260px; height: 260px;
+    border: 1px solid var(--border);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .device-box::before, .device-box::after {
+    content: ''; position: absolute;
+    border: 1px solid var(--accent2);
+    opacity: 0.3;
+  }
+  .device-box::before {
+    inset: -15px;
+    animation: rotateSlow 12s linear infinite;
+  }
+  .device-box::after {
+    inset: -30px;
+    animation: rotateSlow 20s linear infinite reverse;
+  }
+  .device-inner {
+    text-align: center;
+  }
+  .device-word {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.3em;
+    text-transform: uppercase; display: block;
+    padding: 0.5rem 0; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .device-word:last-child { border-bottom: none; }
+  .device-word.active { color: var(--accent); font-weight: 700; }
+  .device-arrow {
+    color: var(--accent2); font-size: 0.7rem;
+    display: block; padding: 0.3rem 0;
+    font-family: 'Space Mono', monospace;
+  }
+  .orbit {
+    position: absolute; border-radius: 50%;
+    border: 1px dashed var(--border);
+    animation: rotateSlow 8s linear infinite;
+  }
+  .orbit-1 { width: 340px; height: 340px; }
+  .orbit-2 { width: 420px; height: 420px; animation-duration: 15s; animation-direction: reverse; }
+  .orbit-dot {
+    position: absolute; width: 6px; height: 6px;
+    background: var(--accent2); border-radius: 50%;
+    top: -3px; left: 50%; transform: translateX(-50%);
+  }
+
+  /* METRICS */
+  #metrics {
+    background: var(--surface);
+    padding: 5rem 4rem;
+  }
+  .metrics-inner {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; border: 1px solid var(--border);
+  }
+  .metric-item {
+    padding: 3rem 2.5rem;
+    border-right: 1px solid var(--border);
+  }
+  .metric-item:last-child { border-right: none; }
+  .metric-num {
+    font-size: 3.5rem; font-weight: 800;
+    line-height: 1; letter-spacing: -0.03em;
+  }
+  .metric-num.y { color: var(--accent); }
+  .metric-num.c { color: var(--accent2); }
+  .metric-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+    margin-top: 0.8rem;
+  }
+
+  /* ABOUT */
+  #about { background: var(--bg); }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6rem; align-items: start; margin-top: 4rem;
+  }
+  .about-text p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem; line-height: 1.9;
+    color: var(--muted); margin-bottom: 1.2rem;
+  }
+  .about-text p strong { color: var(--text); font-weight: normal; }
+  .skills-list {
+    display: flex; flex-wrap: wrap; gap: 0.6rem;
+    margin-top: 2rem;
+  }
+  .skill-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.1em;
+    padding: 0.4rem 0.9rem; border: 1px solid var(--border);
+    color: var(--muted); text-transform: uppercase;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .skill-tag:hover { border-color: var(--accent); color: var(--accent); }
+  .about-right {}
+  .about-quote {
+    font-size: 1.5rem; font-weight: 700;
+    line-height: 1.4; letter-spacing: -0.01em;
+    border-left: 2px solid var(--accent);
+    padding-left: 1.5rem; margin-bottom: 3rem;
+  }
+  .about-quote span { color: var(--accent); }
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item {
+    display: grid; grid-template-columns: 100px 1fr;
+    gap: 1.5rem; padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tl-year {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; color: var(--accent2);
+    letter-spacing: 0.1em; padding-top: 0.2rem;
+  }
+  .tl-role { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .tl-org {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem; color: var(--muted);
+  }
+
+  /* CONTACT */
+  #contact {
+    background: var(--surface);
+    text-align: center; padding: 7rem 4rem;
+  }
+  #contact .section-title { max-width: 100%; }
+  .contact-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem; color: var(--muted);
+    margin: 1.5rem auto 3rem; max-width: 460px; line-height: 1.8;
+  }
+  .contact-links {
+    display: flex; justify-content: center;
+    gap: 2rem; flex-wrap: wrap; margin-top: 3rem;
+  }
+  .contact-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 0.6rem;
+    transition: color 0.2s;
+  }
+  .contact-link:hover { color: var(--accent); }
+  .contact-link::before { content: '↗'; font-size: 0.9rem; }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem; letter-spacing: 0.2em; color: var(--accent);
+  }
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none; z-index: 9990;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* NOISE TEXTURE */
+  .noise {
+    position: fixed; inset: 0; pointer-events: none;
+    z-index: 1; opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  /* BLINKING CURSOR */
+  .blink { animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--dimmed); }
+
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    .nav-links { display: none; }
+    section, #hero, #metrics, #contact { padding: 5rem 2rem; }
+    footer { padding: 2rem; }
+    .services-grid, .metrics-inner { grid-template-columns: 1fr 1fr; }
+    .service-card { border-right: none; border-bottom: 1px solid var(--border); }
+    .metric-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .process-wrapper, .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .process-visual { height: 300px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">DIVYZE<span class="blink">_</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a class="nav-cta" href="#contact">Engage →</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <p class="hero-tag">Analytical Intelligence System v1.0</p>
+  <h1 class="hero-title">A Device<br/>for <span>Potential.</span></h1>
+  <p class="hero-sub">
+    Transforming raw data, untapped capability, and unclear problems<br/>
+    into structured insights that drive decisions.
+  </p>
+  <div class="hero-actions">
+    <a href="#services" class="btn-primary">Explore Services</a>
+    <a href="#about" class="btn-ghost">About Divyze</a>
+  </div>
+  <div class="hero-scroll">Scroll to explore</div>
+  <div class="hero-stat">
+    <div class="hero-stat-num">2+</div>
+    <div class="hero-stat-label">Years of B2B<br/>Intelligence</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SERVICES -->
+<section id="services">
+  <p class="section-tag reveal">What We Do</p>
+  <h2 class="section-title reveal">Four pillars of <span>structured insight.</span></h2>
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="service-num">01 —</div>
+      <span class="service-icon">◈</span>
+      <div class="service-name">Market & Business Research</div>
+      <p class="service-desc">Structured research to understand markets, customers, and global opportunities — with precision.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02 —</div>
+      <span class="service-icon">◇</span>
+      <div class="service-name">Data Analysis & Insights</div>
+      <p class="service-desc">Cleaning, analyzing, and translating complex data into actionable, usable intelligence.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03 —</div>
+      <span class="service-icon">◉</span>
+      <div class="service-name">Lead & Intelligence Research</div>
+      <p class="service-desc">Targeted B2B data research to support sales pipelines, growth teams, and delegate profiling.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">04 —</div>
+      <span class="service-icon">⬡</span>
+      <div class="service-name">Strategic Support</div>
+      <p class="service-desc">Research-backed inputs for planning, campaign execution, and cross-functional alignment.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROCESS -->
+<section id="process">
+  <p class="section-tag reveal">How We Think</p>
+  <h2 class="section-title reveal">Most potential is wasted<br/>without <span>structure.</span></h2>
+  <div class="process-wrapper">
+    <div class="process-steps reveal">
+      <div class="process-step">
+        <div class="step-label">Input</div>
+        <div class="step-content">
+          <h3 class="step-accent">Data & Ambiguity</h3>
+          <p>Raw information, unclear problems, untapped capability — whatever state your data is in, we begin here.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-label">Process</div>
+        <div class="step-content">
+          <h3 class="step-accent2">Analysis & Logic</h3>
+          <p>Research-driven frameworks, validation processes, and segmentation logic applied with rigor.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-label">Output</div>
+        <div class="step-content">
+          <h3>Actionable Insight</h3>
+          <p>Structured reports, qualified decisions, and intelligence that can be immediately acted upon.</p>
+        </div>
+      </div>
+    </div>
+    <div class="process-visual reveal">
+      <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+      <div class="orbit orbit-2"><div class="orbit-dot" style="top:auto;bottom:-3px;"></div></div>
+      <div class="device-box">
+        <div class="device-inner">
+          <span class="device-word">DATA</span>
+          <span class="device-arrow">↓</span>
+          <span class="device-word active">DIVYZE</span>
+          <span class="device-arrow">↓</span>
+          <span class="device-word">INSIGHT</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METRICS -->
+<section id="metrics">
+  <div class="metrics-inner reveal">
+    <div class="metric-item">
+      <div class="metric-num y">2+</div>
+      <div class="metric-label">Years B2B Research</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num c">4</div>
+      <div class="metric-label">Target Markets</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num y">10+</div>
+      <div class="metric-label">Conference Projects</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-num c">∞</div>
+      <div class="metric-label">Insights Generated</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="section-tag reveal">Behind Divyze</p>
+  <h2 class="section-title reveal">Analytical thinking,<br/><span>human-driven.</span></h2>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>
+        Divyze is built at the intersection of <strong>analytics, research, and structured thinking</strong> — designed to help individuals and organizations make better, faster decisions.
+      </p>
+      <p>
+        Founded by <strong>Divin N R</strong>, a detail-oriented Market Research Analyst with hands-on experience in B2B data research, delegate profiling, and market intelligence for global conferences across Australia, New Zealand, the UK, and the United States.
+      </p>
+      <p>
+        We operate like a precision instrument — taking in complexity and outputting clarity.
+      </p>
+      <div class="skills-list">
+        <span class="skill-tag">Salesforce</span>
+        <span class="skill-tag">SQL</span>
+        <span class="skill-tag">Power BI</span>
+        <span class="skill-tag">Excel</span>
+        <span class="skill-tag">Zoho CRM</span>
+        <span class="skill-tag">Sales Navigator</span>
+        <span class="skill-tag">B2B Research</span>
+        <span class="skill-tag">Lead Gen</span>
+      </div>
+    </div>
+    <div class="about-right reveal">
+      <div class="about-quote">
+        "Let's shape insights<br/>into <span>results.</span>"
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="tl-year">2023 →<br/>Present</div>
+          <div>
+            <div class="tl-role">Market Research Analyst</div>
+            <div class="tl-org">Uniqleads Research Private Limited</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-year">2021 →<br/>2022</div>
+          <div>
+            <div class="tl-role">Admin Executive</div>
+            <div class="tl-org">S Squared Architects Private Limited</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-year">2023 →<br/>2025</div>
+          <div>
+            <div class="tl-role">MBA — Marketing</div>
+            <div class="tl-org">Indira Gandhi National Open University</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <p class="section-tag reveal">Get In Touch</p>
+  <h2 class="section-title reveal" style="max-width:100%;text-align:center;">
+    Ready to turn data<br/>into <span>decisions?</span>
+  </h2>
+  <p class="contact-sub reveal">
+    Whether you need market research, data analysis, or strategic insight — let's build something structured together.
+  </p>
+  <a href="mailto:divinnr121@gmail.com" class="btn-primary reveal">divinnr121@gmail.com</a>
+  <div class="contact-links reveal">
+    <a href="https://www.linkedin.com/in/divin-n-r" class="contact-link" target="_blank">LinkedIn</a>
+    <a href="tel:+917025374633" class="contact-link">+91 7025374633</a>
+    <a href="https://divyze.github.io" class="contact-link" target="_blank">divyze.github.io</a>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">DIVYZE<span class="blink">_</span></span>
+  <span class="footer-copy">© 2026 Divyze. All rights reserved.</span>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animateCursor() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+  document.querySelectorAll('a, button, .service-card').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '16px'; cursor.style.height = '16px';
+      ring.style.width = '52px'; ring.style.height = '52px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '10px'; cursor.style.height = '10px';
+      ring.style.width = '36px'; ring.style.height = '36px';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Typewriter hero tag effect
+  const tag = document.querySelector('.hero-tag');
+  const original = tag.textContent;
+  tag.textContent = '';
+  let i = 0;
+  setTimeout(() => {
+    const type = setInterval(() => {
+      tag.textContent = original.slice(0, ++i);
+      if (i >= original.length) clearInterval(type);
+    }, 40);
+  }, 300);
+</script>
+</body>
+</html>
