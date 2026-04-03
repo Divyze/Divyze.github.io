@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Divyze — A Device for Potential</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Playfair+Display:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --cr:#f5f1ea; --cr2:#ede8df; --cr3:#e3ddd3;
+  --ink:#1a1714; --ink2:#3a342e;
+  --mt:#9a9189; --mt2:#c5bdb5;
+  --ac:#2d4a3e; --ac2:#4a7c6b;
+  --bd:rgba(26,23,20,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cr);color:var(--ink);font-family:'Space Mono',monospace;overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+.cur{position:fixed;width:10px;height:10px;border:1.5px solid var(--ink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s}
+.cur-dot{position:fixed;width:3px;height:3px;background:var(--ink);border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%)}
+.coords{position:fixed;bottom:1.8rem;left:1.8rem;font-size:.46rem;letter-spacing:.18em;color:var(--mt);z-index:9999;pointer-events:none;line-height:1.8}
+
+/* INTRO */
+#intro{position:fixed;inset:0;z-index:10000;background:var(--cr);display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem 3.5rem;overflow:hidden}
+.i-top{display:flex;justify-content:space-between;opacity:0;animation:iFade .5s .1s forwards}
+.i-brand{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink2)}
+.i-tr{font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mt);text-align:right;line-height:1.9}
+.i-main{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;pointer-events:none}
+.i-logo{opacity:0;animation:iFade .8s .3s ease forwards}
+.i-word{font-family:'Playfair Display',serif;font-size:clamp(5rem,14vw,11rem);font-weight:800;font-style:italic;color:var(--ink);line-height:1;letter-spacing:-.03em;opacity:0;animation:iUp 1s .5s cubic-bezier(.16,1,.3,1) forwards}
+.i-tagline{font-size:.58rem;letter-spacing:.4em;text-transform:uppercase;color:var(--mt);opacity:0;animation:iFade .7s 1s forwards}
+.i-bot{display:flex;justify-content:space-between;align-items:flex-end;opacity:0;animation:iFade .5s .2s forwards}
+.i-cl{font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;color:var(--mt);margin-bottom:.3rem}
+.i-cn{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;font-style:italic;color:var(--ink);line-height:1}
+.i-br{font-size:.52rem;letter-spacing:.12em;color:var(--mt);text-align:right;line-height:2}
+.i-bar{position:absolute;bottom:0;left:0;height:1.5px;width:0;background:var(--ink)}
+.i-wipe{position:absolute;inset:0;background:var(--cr2);clip-path:inset(100% 0 0 0);transition:clip-path .85s cubic-bezier(.76,0,.24,1)}
+#intro.wipe .i-wipe{clip-path:inset(0 0 0 0)}
+@keyframes iFade{from{opacity:0}to{opacity:1}}
+@keyframes iUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.2rem 3.5rem;border-bottom:1px solid var(--bd);background:rgba(245,241,234,.92);backdrop-filter:blur(20px)}
+.nl{font-size:1.15rem;letter-spacing:.2em;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:.75rem;line-height:1}
+.nl img{height:30px;filter:brightness(0)}
+.nm{display:flex;gap:2.5rem;list-style:none}
+.nm a{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mt);text-decoration:none;transition:color .2s}
+.nm a:hover{color:var(--ink)}
+.nc{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:.5rem 1.2rem;border:1px solid var(--ink);color:var(--ink);text-decoration:none;transition:background .2s,color .2s}
+.nc:hover{background:var(--ink);color:var(--cr)}
+
+/* MARQUEE DARK */
+.mq{overflow:hidden;background:var(--ink);padding:.7rem 0;white-space:nowrap}
+.mq-t{display:inline-flex;animation:mq 28s linear infinite}
+.mq-t.rev{animation-direction:reverse;animation-duration:22s}
+.mq-t:hover{animation-play-state:paused}
+.mi{font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(245,241,234,.55);padding:0 2rem}
+.ms{color:var(--ac2);font-size:.7rem;vertical-align:middle;opacity:.5}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ══════ HERO PINNED ══════ */
+#hero-pin{position:relative;height:300vh}
+#hero-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--cr)}
+#hbg{position:absolute;inset:0;pointer-events:none}
+.h-content{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:0 3.5rem 5rem;z-index:2}
+.h-eye{font-size:.58rem;letter-spacing:.35em;text-transform:uppercase;color:var(--mt);margin-bottom:1.5rem;overflow:hidden;height:1.1em}
+.h-eye span{display:block;transform:translateY(110%);transition:transform .9s cubic-bezier(.16,1,.3,1)}
+.h-eye span.up{transform:translateY(0)}
+.h-title{font-family:'Playfair Display',serif;font-size:clamp(4rem,8vw,8.5rem);font-weight:800;font-style:italic;line-height:.92;letter-spacing:-.03em;color:var(--ink)}
+.h-title .ww{display:inline-block;overflow:hidden;vertical-align:bottom;margin-right:.15em}
+.h-title .ww span{display:block;transform:translateY(110%);transition:transform .8s cubic-bezier(.16,1,.3,1)}
+.h-title .ww span.up{transform:translateY(0)}
+.h-em{color:var(--ac)}
+.h-bot{display:flex;align-items:flex-end;justify-content:space-between;margin-top:2.5rem;opacity:0;transition:opacity .9s}
+.h-bot.on{opacity:1}
+.h-desc{font-size:.68rem;line-height:2;color:var(--mt);max-width:340px}
+.h-acts{display:flex;gap:1rem}
+.btn-dk{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:.8rem 1.8rem;background:var(--ink);color:var(--cr);text-decoration:none;transition:transform .15s,box-shadow .15s;display:inline-block}
+.btn-dk:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(26,23,20,.15)}
+.btn-ol{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:.8rem 1.8rem;border:1px solid var(--bd);color:var(--ink2);text-decoration:none;background:transparent;transition:border-color .2s,background .2s}
+.btn-ol:hover{border-color:var(--ink);background:var(--cr2)}
+.h-scr{position:absolute;right:3.5rem;bottom:2.5rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;z-index:2;opacity:0;transition:opacity .6s .8s}
+.h-scr.on{opacity:1}
+.h-scr span{font-size:.48rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mt);writing-mode:vertical-rl}
+.scr-ln{width:1px;height:44px;background:linear-gradient(to bottom,var(--ink2),transparent);animation:pulse 1.8s ease infinite}
+@keyframes pulse{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* floating tags */
+.ftag{position:absolute;font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);border:1px solid var(--bd);padding:.35rem .8rem;background:rgba(245,241,234,.85);backdrop-filter:blur(6px);opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease;pointer-events:none;z-index:3}
+.ftag.on{opacity:1;transform:translateY(0)}
+
+/* ══════ VISUAL SECTION 1: ANIMATED DASHBOARD ══════ */
+#dash-section{background:var(--ink);padding:8rem 3.5rem;overflow:hidden;position:relative}
+.dash-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;max-width:1200px;margin:0 auto}
+.dash-text h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:800;font-style:italic;color:var(--cr);line-height:1.1;margin-bottom:1.5rem}
+.dash-text h2 em{color:var(--ac2)}
+.dash-text p{font-size:.68rem;line-height:2;color:rgba(245,241,234,.45);margin-bottom:2rem}
+.dash-tag{font-size:.54rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ac2);margin-bottom:1rem;opacity:.7}
+
+/* The dashboard visual */
+.dash-visual{position:relative;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);padding:2rem}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:1rem}
+.dash-header-title{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,241,234,.35)}
+.dash-dot{width:6px;height:6px;border-radius:50%;background:var(--ac2);animation:dashBlink 2s ease infinite}
+@keyframes dashBlink{0%,100%{opacity:.3}50%{opacity:1}}
+/* bar chart inside dashboard */
+.dash-chart{display:flex;align-items:flex-end;gap:6px;height:120px;margin-bottom:1.5rem}
+.dash-bar{flex:1;background:rgba(74,124,107,.15);border-radius:2px 2px 0 0;position:relative;transition:height 1.2s cubic-bezier(.16,1,.3,1);height:0}
+.dash-bar::after{content:attr(data-label);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.42rem;letter-spacing:.05em;color:rgba(245,241,234,.25);white-space:nowrap}
+.dash-bar.on{background:linear-gradient(to top,rgba(45,74,62,.8),rgba(74,124,107,.4))}
+/* sparkline */
+.dash-sparkline{border-top:1px solid rgba(255,255,255,.07);padding-top:1rem}
+.dash-spark-label{font-size:.48rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(245,241,234,.25);margin-bottom:.5rem}
+#sparkSvg{width:100%;height:50px;overflow:visible}
+.spark-path{stroke:var(--ac2);stroke-width:1.5;fill:none;stroke-dasharray:500;stroke-dashoffset:500;transition:stroke-dashoffset 2s ease .5s}
+.spark-path.on{stroke-dashoffset:0}
+.spark-fill{fill:url(#sparkGrad);opacity:.15;clip-path:inset(0 100% 0 0);transition:clip-path 2s ease .5s}
+.spark-fill.on{clip-path:inset(0 0% 0 0)}
+/* stats row */
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.07)}
+.ds{text-align:center}
+.ds-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;font-style:italic;color:var(--cr);line-height:1}
+.ds-num em{color:var(--ac2)}
+.ds-lbl{font-size:.45rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(245,241,234,.3);margin-top:.3rem}
+
+/* ══════ VISUAL SECTION 2: WORLD MAP / MARKETS ══════ */
+#markets-section{background:var(--cr2);padding:8rem 3.5rem;overflow:hidden}
+.mkt-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;max-width:1200px;margin:0 auto}
+.mkt-tag{font-size:.54rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mt);margin-bottom:1rem}
+.mkt-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;font-style:italic;color:var(--ink);line-height:1.1;margin-bottom:1.5rem}
+.mkt-title em{color:var(--ac)}
+.mkt-desc{font-size:.68rem;line-height:2;color:var(--mt);margin-bottom:2.5rem}
+/* market pills */
+.mkt-pills{display:flex;flex-wrap:wrap;gap:.6rem}
+.mkt-pill{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;padding:.5rem 1.1rem;border:1px solid var(--bd);color:var(--ink2);background:var(--cr);opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease,border-color .2s,background .2s}
+.mkt-pill.on{opacity:1;transform:translateY(0)}
+.mkt-pill:hover{border-color:var(--ac);color:var(--ac)}
+/* globe SVG animation */
+.globe-wrap{position:relative;display:flex;align-items:center;justify-content:center;height:420px}
+#globeSvg{width:360px;height:360px;overflow:visible}
+.globe-circle{stroke:var(--bd);stroke-width:1.5;fill:none}
+.globe-meridian{stroke:var(--bd);stroke-width:.8;fill:none;opacity:.6}
+.globe-ring{stroke:var(--ac2);stroke-width:1.5;fill:none;stroke-dasharray:8 4;animation:rotRing 20s linear infinite;transform-origin:50% 50%;transform-box:fill-box}
+@keyframes rotRing{from{stroke-dashoffset:0}to{stroke-dashoffset:100}}
+.globe-dot{fill:var(--ac);opacity:0;transform-origin:50% 50%;transform-box:fill-box}
+.globe-dot.on{animation:dotPop .5s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes dotPop{from{opacity:0;r:0}to{opacity:1;r:6}}
+.globe-line{stroke:var(--ac2);stroke-width:.8;fill:none;stroke-dasharray:200;stroke-dashoffset:200;opacity:.4;transition:stroke-dashoffset 1.5s ease}
+.globe-line.on{stroke-dashoffset:0}
+.globe-label{font-size:.42rem;letter-spacing:.12em;fill:var(--ac2);text-transform:uppercase;opacity:0;transition:opacity .5s .8s ease}
+.globe-label.on{opacity:.8}
+
+/* ══════ VISUAL SECTION 3: RESEARCH PROCESS ANIMATION ══════ */
+#flow-section{background:var(--cr);padding:8rem 3.5rem;overflow:hidden}
+.flow-wrap{max-width:1000px;margin:0 auto}
+.flow-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;font-style:italic;color:var(--ink);margin-bottom:4rem;line-height:1.1}
+.flow-title em{color:var(--ac)}
+/* animated flow diagram */
+.flow-diagram{position:relative}
+.flow-row{display:flex;align-items:center;gap:0;margin-bottom:0}
+.flow-node{background:var(--cr2);border:1px solid var(--bd);padding:1.5rem 2rem;flex:1;position:relative;opacity:0;transform:translateX(-30px);transition:opacity .7s ease,transform .7s ease,border-color .3s,background .3s}
+.flow-node.on{opacity:1;transform:translateX(0)}
+.flow-node:hover{border-color:var(--ac);background:var(--cr)}
+.fn-tag{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2);margin-bottom:.5rem;opacity:.7}
+.fn-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;font-style:italic;color:var(--ink);margin-bottom:.4rem}
+.fn-desc{font-size:.6rem;line-height:1.8;color:var(--mt)}
+.flow-arrow{width:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .5s .4s ease}
+.flow-arrow.on{opacity:1}
+.flow-arrow svg{overflow:visible}
+/* connector line that draws in */
+.flow-connect{height:40px;width:2px;background:var(--bd);margin:0 auto;position:relative;overflow:hidden}
+.flow-connect::after{content:'';position:absolute;top:0;left:0;width:100%;height:0;background:var(--ac2);transition:height .8s ease}
+.flow-connect.on::after{height:100%}
+/* animated counter */
+.flow-stat{text-align:center;padding:2.5rem;border:1px solid var(--bd);background:var(--cr2);margin-top:0}
+.flow-stat-num{font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:800;font-style:italic;color:var(--ac);line-height:1}
+.flow-stat-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mt);margin-top:.5rem}
+
+/* flow grid — 3 nodes with arrows */
+.flow-grid{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:0;margin-bottom:3rem}
+
+/* ══════ SERVICES ══════ */
+#services{background:var(--cr2);padding:7rem 3.5rem}
+.stabs{display:flex;border-bottom:1px solid var(--bd);margin-top:4rem;overflow-x:auto}
+.tab-btn{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;padding:1rem 1.5rem;color:var(--mt);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--ac)}
+.tab-btn:hover{color:var(--ink2)}
+.tab-panel{display:none;padding:3.5rem 0}
+.tab-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.p-num{font-size:.54rem;letter-spacing:.15em;color:var(--mt);margin-bottom:1.2rem}
+.p-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;font-style:italic;line-height:1.2;margin-bottom:1.2rem;color:var(--ink)}
+.p-title em{color:var(--ac)}
+.p-desc{font-size:.68rem;line-height:2;color:var(--mt);margin-bottom:2rem}
+.p-list{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.p-list li{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);padding:.75rem 1rem;border:1px solid var(--bd);display:flex;align-items:center;gap:.8rem;transition:all .25s;background:var(--cr)}
+.p-list li:hover{border-color:var(--ac);color:var(--ac);background:var(--cr2)}
+.p-list li::before{content:'→';color:var(--ac);flex-shrink:0}
+.p-cta{display:inline-block;margin-top:2rem;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;padding:.7rem 1.5rem;border:1px solid var(--ink);color:var(--ink);text-decoration:none;transition:all .2s}
+.p-cta:hover{background:var(--ink);color:var(--cr)}
+
+/* MARQUEE CREAM */
+.mq-cr{overflow:hidden;background:var(--cr3);padding:.6rem 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+.mi-c{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mt);padding:0 2rem;font-style:italic}
+.ms-c{color:var(--ac);opacity:.4;font-size:.65rem;vertical-align:middle}
+
+/* PROCESS */
+#process{background:var(--cr);padding:7rem 3.5rem}
+.proc-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;margin-top:4rem}
+.proc-steps{display:flex;flex-direction:column}
+.proc-step{display:grid;grid-template-columns:50px 1fr;gap:1.5rem;padding:1.8rem 0;border-bottom:1px solid var(--bd)}
+.proc-step:first-child{border-top:1px solid var(--bd)}
+.s-lbl{font-size:.53rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mt);padding-top:.2rem}
+.s-con h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;font-style:italic;margin-bottom:.4rem;color:var(--ink)}
+.sa{color:var(--ac)}.sa2{color:var(--ac2)}
+.s-con p{font-size:.65rem;line-height:1.85;color:var(--mt)}
+.proc-vis{position:relative;height:380px;display:flex;align-items:center;justify-content:center}
+.dev-box{width:230px;height:230px;border:1px solid var(--bd);position:relative;display:flex;align-items:center;justify-content:center;background:var(--cr2)}
+.dev-box::before,.dev-box::after{content:'';position:absolute;border:1px solid var(--mt2);opacity:.35}
+.dev-box::before{inset:-16px;animation:rot 14s linear infinite}
+.dev-box::after{inset:-32px;animation:rot 22s linear infinite reverse}
+.dw{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;display:block;padding:.5rem 0;color:var(--mt);border-bottom:1px solid var(--bd)}
+.dw:last-child{border-bottom:none}.dw.active{color:var(--ac);font-weight:700}
+.da{font-size:.65rem;display:block;padding:.3rem 0;color:var(--mt2)}
+.orb{position:absolute;border-radius:50%;border:1px dashed var(--bd);animation:rot 10s linear infinite}
+.orb-1{width:310px;height:310px}.orb-2{width:390px;height:390px;animation-duration:18s;animation-direction:reverse}
+.orb-dot{position:absolute;width:5px;height:5px;background:var(--ac2);border-radius:50%;top:-2.5px;left:50%;transform:translateX(-50%)}
+@keyframes rot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* PROJECTS */
+#projects{background:var(--cr2);padding:7rem 3.5rem}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:4rem}
+.pc{background:var(--cr);border:1px solid var(--bd);padding:2.5rem;position:relative;overflow:hidden;cursor:pointer;transition:border-color .3s,box-shadow .3s,transform .25s;transform-style:preserve-3d}
+.pc:hover{border-color:rgba(26,23,20,.2);box-shadow:0 18px 50px rgba(26,23,20,.07);transform:translateY(-4px)}
+.pc-in{transition:transform .15s ease;transform-style:preserve-3d}
+.pc-line{position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
+.pc:hover .pc-line{transform:scaleX(1)}
+.pc-n{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mt);margin-bottom:2rem;display:flex;align-items:center;gap:.8rem}
+.pc-n::after{content:'';flex:1;height:1px;background:rgba(26,23,20,.04)}
+.pc-ico{font-size:1.8rem;margin-bottom:1.5rem;display:block;opacity:.12;transition:opacity .3s}
+.pc:hover .pc-ico{opacity:.35}
+.pc-tag{font-size:.53rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mt);margin-bottom:.6rem}
+.pc-ttl{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;font-style:italic;line-height:1.25;margin-bottom:.8rem;color:var(--ink);transition:color .2s}
+.pc:hover .pc-ttl{color:var(--ac)}
+.pc-desc{font-size:.6rem;line-height:1.9;color:var(--mt)}
+.pc-arr{position:absolute;bottom:2rem;right:2rem;font-size:1rem;color:var(--ink);opacity:0;transform:translate(-4px,4px);transition:opacity .3s,transform .3s}
+.pc:hover .pc-arr{opacity:1;transform:translate(0,0)}
+
+/* ABOUT */
+#about{background:var(--cr);padding:7rem 3.5rem}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start;margin-top:4rem}
+.ab-grid p{font-size:.72rem;line-height:2;color:var(--mt);margin-bottom:1.2rem}
+.ab-grid p strong{color:var(--ink);font-weight:normal}
+
+/* CONTACT */
+#contact{background:var(--ink);text-align:center;padding:7rem 3.5rem}
+.sec-tag{font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--mt);margin-bottom:1rem;display:flex;align-items:center;gap:.9rem}
+.sec-tag::before{content:'';width:22px;height:1px;background:var(--mt2);flex-shrink:0;opacity:.4}
+.sec-tag2{color:var(--mt2)}
+#contact .sec-tag{justify-content:center}
+.sec-ttl{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:800;font-style:italic;line-height:1.08;letter-spacing:-.02em;color:var(--cr)}
+.sec-ttl em{color:var(--ac2)}
+.sec-ttl2{color:var(--ink);max-width:660px}
+.sec-ttl2 em{color:var(--ac)}
+.c-sub{font-size:.68rem;color:#7a7570;margin:1.5rem auto 3rem;max-width:400px;line-height:1.9}
+.cc{display:inline-flex;flex-direction:column;align-items:center;gap:2rem;border:1px solid rgba(255,255,255,.09);padding:3rem 4rem;position:relative}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--ac2),transparent)}
+.ce{font-family:'Playfair Display',serif;font-size:clamp(1.1rem,2.5vw,1.5rem);font-style:italic;color:var(--cr);text-decoration:none;transition:color .2s}
+.ce:hover{color:var(--ac2)}
+.cl{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.cli{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:#7a7570;text-decoration:none;display:flex;align-items:center;gap:.5rem;transition:color .2s}
+.cli:hover{color:var(--cr)}.cli::before{content:'↗';font-size:.7rem}
+
+/* FOOTER */
+footer{position:relative;overflow:hidden;padding:2.5rem 3.5rem;background:#110f0d;border-top:1px solid rgba(255,255,255,.04)}
+#fcanv{position:absolute;inset:0;pointer-events:none}
+.fi{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center}
+.fl{font-size:.75rem;letter-spacing:.2em;color:var(--cr);display:flex;align-items:center;gap:.6rem}
+.fl img{height:20px}
+.fcp{font-size:.56rem;color:#55504d}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease}
+.rv.on{opacity:1;transform:none}
+.rl{opacity:0;transform:translateX(-32px);transition:opacity .8s ease,transform .8s ease}
+.rl.on{opacity:1;transform:none}
+.rr{opacity:0;transform:translateX(32px);transition:opacity .8s ease,transform .8s ease}
+.rr.on{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.stag>*{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease}
+.stag.on>*:nth-child(1){opacity:1;transform:none;transition-delay:.04s}
+.stag.on>*:nth-child(2){opacity:1;transform:none;transition-delay:.17s}
+.stag.on>*:nth-child(3){opacity:1;transform:none;transition-delay:.3s}
+.divider{height:1px;background:var(--bd)}
+
+.blink{animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--cr2)}
+::-webkit-scrollbar-thumb{background:var(--mt2)}
+
+@media(max-width:900px){
+  #intro{padding:1.8rem}
+  nav{padding:1rem 1.5rem}.nm{display:none}
+  #dash-section,#markets-section,#flow-section,#services,#process,#projects,#about,#contact{padding:5rem 1.5rem}
+  .dash-wrap,.mkt-wrap,.proc-wrap,.ab-grid{grid-template-columns:1fr;gap:3rem}
+  .flow-grid{grid-template-columns:1fr;gap:1.5rem}
+  .flow-arrow{transform:rotate(90deg)}
+  .tab-panel.active{grid-template-columns:1fr;gap:2rem}
+  .pgrid{grid-template-columns:1fr}
+  .proc-vis{height:260px}
+  footer{padding:2rem 1.5rem}.fi{flex-direction:column;gap:1rem;text-align:center}
+  .globe-wrap{height:280px}#globeSvg{width:260px;height:260px}
+  .cc{padding:2rem 1.5rem}.h-content{padding:0 1.5rem 4rem}
+  .h-title{font-size:clamp(3rem,10vw,5.5rem)}
+  .coords{display:none}.ftag{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-dot" id="curD"></div>
+<div class="coords" id="coords">X 0000<br/>Y 0000</div>
+
+<!-- ════ INTRO ════ -->
+<div id="intro">
+  <div class="i-top">
+    <div class="i-brand">Divyze &mdash; Research Intelligence</div>
+    <div class="i-tr">B2B &middot; Data &middot; Insight<br/><span style="color:#bbb">EST. 2023</span></div>
+  </div>
+  <div class="i-main">
+    <div class="i-logo"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNTAwLjAwMDAwMHB0IiBoZWlnaHQ9IjUwMC4wMDAwMDBwdCIgdmlld0JveD0iMCAwIDUwMC4wMDAwMDAgNTAwLjAwMDAwMCIKIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIG1lZXQiPgoKPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsNTAwLjAwMDAwMCkgc2NhbGUoMC4xMDAwMDAsLTAuMTAwMDAwKSIKZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSJub25lIj4KPHBhdGggZD0iTTIwOTQgMzk2NSBjLTMzIC04IC04NCAtMjMgLTExMyAtMzQgLTQyIC0xNiAtNjcgLTE5IC0xMjIgLTE0IGwtNjkKNiAtMjYgLTU5IGMtNTUgLTEyNCAtNjcgLTE5NCAtNjcgLTM4NCAwIC0xNDUgNCAtMTk5IDI2IC0zMTUgODMgLTQ1NSA4MCAtNDMxCjgxIC02MjAgMSAtMTkyIC02IC0yMzcgLTYwIC0zNzQgLTE0IC0zNSAtMjQgLTY1IC0yMiAtNjYgMiAtMiA3MSAtOCAxNTMgLTE0CjgzIC01IDE5MSAtMTkgMjQwIC0zMCAyNTIgLTU3IDU0NiA5IDc2MyAxNzEgNTEgMzggNTQgMzkgNzMgMjIgMTUgLTEzIDE5IC0zMQoxOSAtNzggbDAgLTYxIDIyMCAtMjIwIGMxMjAgLTEyMCAyMjEgLTIxNyAyMjMgLTIxNSAyIDMgMTIgMjUgMjEgNDkgMTAgMjUgMjYKNTggMzggNzMgMjEgMzAgMTA1IDc4IDEzNiA3OCAxMCAwIDIyIDMgMjYgNyA0IDQgLTk0IDEwNyAtMjE2IDIzMCBsLTIyMyAyMjMKLTYxIDAgYy00NyAwIC02NSA0IC03OCAxOSAtMTcgMTggLTE1IDIyIDMwIDgzIDYwIDgwIDEyNiAyMjAgMTU0IDMyMyAyOCAxMDIKMzcgMjgzIDIxIDM5NSAtNTggMzk1IC0zNjggNzIyIC03NjMgODA1IC04NiAxOSAtMzE5IDE4IC00MDQgMHogbTM3MiAtMzAwCmMxMTMgLTI5IDIyMSAtOTEgMzA0IC0xNzQgODUgLTg2IDEyOSAtMTU2IDE2OCAtMjYzIDI0IC02NiAyNyAtODYgMjcgLTIxMyAwCi0xMjAgLTMgLTE0OSAtMjMgLTIwNSAtMTAzIC0yOTcgLTM3MiAtNDg0IC02NzEgLTQ2NyAtNDcgMiAtMTA5IDEwIC0xMzcgMTYKbC01MiAxMiA1IDEwMiBjNiAxMTcgLTEzIDI5MCAtNTggNTI0IC00NCAyMzAgLTU5IDM0NiAtNTkgNDgwIGwwIDEyMiAzMSAxNwpjMTM1IDY5IDMxMSA4OCA0NjUgNDl6Ii8+CjxwYXRoIGQ9Ik0yMDcyIDMyNDggbDMgLTExMyAzOCAtMyBjMjMgLTIgMzcgLTggMzcgLTE3IDAgLTI3IDMxIC00NSA3NiAtNDUKNDYgMCA3MSAtMjMgNDQgLTQwIC0xMSAtNyAtMTEgLTE0IC0yIC0zNCAxNSAtMzMgMjkgLTMzIDQ1IDEgOSAyMSA5IDI3IC0xIDMxCi02IDIgLTEyIDEyIC0xMiAyMiAwIDI3IC0yMSAzOCAtNzUgNDIgLTM3IDIgLTUxIDcgLTUzIDIwIC0yIDEzIDUgMTcgMzUgMjAKbDM4IDMgMyA4OSBjMyA4MCAxIDkxIC0xOSAxMTIgLTE5IDIxIC0zMiAyNCAtOTEgMjQgbC02OSAwIDMgLTExMnogbTEwOCA3NwpjMCAtMjAgNSAtMjUgMjUgLTI1IDI0IDAgMjUgLTIgMjUgLTcwIGwwIC03MCAtNzAgMCAtNzAgMCAwIDk1IDAgOTUgNDUgMCBjNDEKMCA0NSAtMiA0NSAtMjV6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMzMTAgYzAgLTUgMTEgLTEwIDI1IC0xMCAxNCAwIDI1IDUgMjUgMTAgMCA2IC0xMSAxMCAtMjUgMTAKLTE0IDAgLTI1IC00IC0yNSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMyNzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMyMzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMxOTAgYzAgLTUgNSAtMTAgMTAgLTEwIDYgMCAxMCA1IDEwIDEwIDAgNiAtNCAxMCAtMTAgMTAgLTUgMAotMTAgLTQgLTEwIC0xMHoiLz4KPHBhdGggZD0iTTIxNDAgMzE5MCBjMCAtNSAxNiAtMTAgMzUgLTEwIDE5IDAgMzUgNSAzNSAxMCAwIDYgLTE2IDEwIC0zNSAxMAotMTkgMCAtMzUgLTQgLTM1IC0xMHoiLz4KPHBhdGggZD0iTTIzNDIgMzI0OCBsMyAtMTEzIDQzIC0zIDQyIC0zIDAgLTQ5IGMwIC0zNCAtNCAtNTAgLTE2IC01NCAtMTQgLTUKLTEzIC05IDMgLTM2IGwxOCAtMzAgMTcgMjIgYzIwIDI2IDIzIDQ4IDggNDggLTUgMCAtMTAgMjIgLTEwIDQ5IGwwIDUwIDM4IDMKMzcgMyAzIDg0IGMzIDgwIDEgODUgLTI0IDExMyAtMjUgMjUgLTM0IDI4IC05NiAyOCBsLTY5IDAgMyAtMTEyeiBtMTE2IDc1IGMyCi0xNCAxMSAtMjMgMjUgLTI1IDIwIC0zIDIyIC0xMCAyNSAtNzAgbDMgLTY4IC03NiAwIC03NSAwIDAgOTYgMCA5NSA0OCAtMwpjNDAgLTMgNDcgLTYgNTAgLTI1eiIvPgo8cGF0aCBkPSJNMjM4MCAzMzEwIGMwIC01IDE0IC0xMCAzMCAtMTAgMTcgMCAzMCA1IDMwIDEwIDAgNiAtMTMgMTAgLTMwIDEwCi0xNiAwIC0zMCAtNCAtMzAgLTEweiIvPgo8cGF0aCBkPSJNMjM4MCAzMjcwIGMwIC01IDUgLTEwIDEwIC0xMCA2IDAgMTAgNSAxMCAxMCAwIDYgLTQgMTAgLTEwIDEwIC01IDAKLTEwIC00IC0xMCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNDIwIDMyNzAgYzAgLTUgMTQgLTEwIDMwIC0xMCAxNyAwIDMwIDUgMzAgMTAgMCA2IC0xMyAxMCAtMzAgMTAKLTE2IDAgLTMwIC00IC0zMCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMzgwIDMyMzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMzgwIDMxOTAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjEyIDMyNDggbDMgLTExMyA0MyAtMyBjMzQgLTMgNDMgLTcgNDAgLTIwIC0yIC0xMyAtMTYgLTE4IC01MQotMjAgLTM5IC0zIC01MCAtOCAtNjQgLTMwIC0xMCAtMTUgLTIxIC0zMCAtMjYgLTMzIC04IC02IDE4IC02OSAyOCAtNjkgNSAwCjM1IDU2IDM1IDY1IDAgMyAtNyA1IC0xNSA1IC04IDAgLTE1IDQgLTE1IDggMCAxOSAyNyAzMiA2NSAzMiA0NCAwIDY1IDEzIDY1CjQxIDAgMTMgMTAgMTkgMzggMjEgbDM3IDMgMyA4NiBjMiA3NCAwIDg5IC0xOCAxMTIgLTIwIDI1IC0yNyAyNyAtOTYgMjcgbC03NQowIDMgLTExMnogbTExOCA3NyBjMCAtMjAgNSAtMjUgMjUgLTI1IDI0IDAgMjUgLTIgMjUgLTcwIGwwIC03MCAtNzUgMCAtNzUgMAowIDk1IDAgOTUgNTAgMCBjNDcgMCA1MCAtMiA1MCAtMjV6Ii8+CjxwYXRoIGQ9Ik0yNjU1IDMzMTAgYy00IC02IDcgLTEwIDI0IC0xMCAxNyAwIDMxIDUgMzEgMTAgMCA2IC0xMSAxMCAtMjQgMTAKLTE0IDAgLTI4IC00IC0zMSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjUwIDMyNzAgYzAgLTUgMjUgLTEwIDU1IC0xMCAzMCAwIDU1IDUgNTUgMTAgMCA2IC0yNSAxMCAtNTUgMTAKLTMwIDAgLTU1IC00IC01NSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjUwIDMyMzAgYzAgLTUgMTYgLTEwIDM1IC0xMCAxOSAwIDM1IDUgMzUgMTAgMCA2IC0xNiAxMCAtMzUgMTAKLTE5IDAgLTM1IC00IC0zNSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNzQwIDMyMzAgYzAgLTUgNSAtMTAgMTAgLTEwIDYgMCAxMCA1IDEwIDEwIDAgNiAtNCAxMCAtMTAgMTAgLTUgMAotMTAgLTQgLTEwIC0xMHoiLz4KPHBhdGggZD0iTTI2NTAgMzE5MCBjMCAtNSAyNSAtMTAgNTUgLTEwIDMwIDAgNTUgNSA1NSAxMCAwIDYgLTI1IDEwIC01NSAxMAotMzAgMCAtNTUgLTQgLTU1IC0xMHoiLz4KPHBhdGggZD0iTTIzNjAgMjk0MCBjLTU2IC0xMCAtMTAyIC0yOCAtMTEyIC00MyAtNCAtNyAtOCAtNzMgLTggLTE0OCAwIC0xNTIKMiAtMTU2IDczIC0xNzkgNTYgLTE4IDIzMiAtOSAyNzUgMTMgbDMyIDE4IDAgMTQ5IDAgMTQ5IC0yOCAxNSBjLTI5IDE1IC0xMzIKMzcgLTE2NiAzNSAtMTIgLTEgLTQxIC01IC02NiAtOXogbTE4MCAtMzMgYzU3IC0xNSA1OSAtMzcgNSAtNTUgLTQ4IC0xNiAtMjA1Ci0xMiAtMjQ5IDcgLTI3IDExIC0yOCAxMyAtMTMgMjggMzAgMzEgMTcyIDQyIDI1NyAyMHogbS0xNzAgLTg4IGM2MCAtOSAxODYgMQoyMTEgMTcgNSAzIDkgLTggOSAtMjQgMCAtNDIgLTQxIC01NyAtMTYwIC01NyAtMTEzIDEgLTE1MyAxNSAtMTU4IDU5IC0zIDI0Ci0xIDI4IDE1IDIxIDEwIC00IDQ3IC0xMSA4MyAtMTZ6IG02MCAtODQgYzU4IDAgMTE4IDQgMTMzIDggMjcgNyAyOCA2IDI1IC0yMAotMyAtMjQgLTEwIC0zMCAtNTMgLTQxIC02NCAtMTcgLTIwOCAtOSAtMjQxIDEzIC0xMyA4IC0yNCAyNSAtMjQgMzYgMCAxOCA0CjIwIDI4IDEzIDE1IC01IDc0IC05IDEzMiAtOXogbS01OSAtODYgYzYzIC05IDE1NiAtMiAyMDIgMTYgMTQgNiAxNyAyIDE3IC0yMwowIC0yNiAtNSAtMzIgLTM3IC00MyAtMjEgLTggLTc4IC0xMyAtMTI4IC0xMyAtMTA4IDAgLTE0OCAxNSAtMTUzIDU4IC0zIDI0Ci0xIDI4IDE1IDIxIDEwIC00IDQ4IC0xMSA4NCAtMTZ6Ii8+CjwvZz4KPC9zdmc+Cg==" alt="" style="width:140px;height:140px;filter:brightness(0);opacity:0;animation:iFade .8s .4s ease forwards;display:block;"/></div>
+    <div class="i-word">Divyze</div>
+    <div class="i-tagline">A Device for Potential</div>
+  </div>
+  <div class="i-bot">
+    <div><div class="i-cl">Loading</div><div class="i-cn" id="iNum">0%</div></div>
+    <div class="i-br">Research Engine v2.0<br/><span style="color:#ccc">divyze.github.io</span></div>
+  </div>
+  <div class="i-bar" id="iBar"></div>
+  <div class="i-wipe"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nl" href="#"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNTAwLjAwMDAwMHB0IiBoZWlnaHQ9IjUwMC4wMDAwMDBwdCIgdmlld0JveD0iMCAwIDUwMC4wMDAwMDAgNTAwLjAwMDAwMCIKIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIG1lZXQiPgoKPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsNTAwLjAwMDAwMCkgc2NhbGUoMC4xMDAwMDAsLTAuMTAwMDAwKSIKZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSJub25lIj4KPHBhdGggZD0iTTIwOTQgMzk2NSBjLTMzIC04IC04NCAtMjMgLTExMyAtMzQgLTQyIC0xNiAtNjcgLTE5IC0xMjIgLTE0IGwtNjkKNiAtMjYgLTU5IGMtNTUgLTEyNCAtNjcgLTE5NCAtNjcgLTM4NCAwIC0xNDUgNCAtMTk5IDI2IC0zMTUgODMgLTQ1NSA4MCAtNDMxCjgxIC02MjAgMSAtMTkyIC02IC0yMzcgLTYwIC0zNzQgLTE0IC0zNSAtMjQgLTY1IC0yMiAtNjYgMiAtMiA3MSAtOCAxNTMgLTE0CjgzIC01IDE5MSAtMTkgMjQwIC0zMCAyNTIgLTU3IDU0NiA5IDc2MyAxNzEgNTEgMzggNTQgMzkgNzMgMjIgMTUgLTEzIDE5IC0zMQoxOSAtNzggbDAgLTYxIDIyMCAtMjIwIGMxMjAgLTEyMCAyMjEgLTIxNyAyMjMgLTIxNSAyIDMgMTIgMjUgMjEgNDkgMTAgMjUgMjYKNTggMzggNzMgMjEgMzAgMTA1IDc4IDEzNiA3OCAxMCAwIDIyIDMgMjYgNyA0IDQgLTk0IDEwNyAtMjE2IDIzMCBsLTIyMyAyMjMKLTYxIDAgYy00NyAwIC02NSA0IC03OCAxOSAtMTcgMTggLTE1IDIyIDMwIDgzIDYwIDgwIDEyNiAyMjAgMTU0IDMyMyAyOCAxMDIKMzcgMjgzIDIxIDM5NSAtNTggMzk1IC0zNjggNzIyIC03NjMgODA1IC04NiAxOSAtMzE5IDE4IC00MDQgMHogbTM3MiAtMzAwCmMxMTMgLTI5IDIyMSAtOTEgMzA0IC0xNzQgODUgLTg2IDEyOSAtMTU2IDE2OCAtMjYzIDI0IC02NiAyNyAtODYgMjcgLTIxMyAwCi0xMjAgLTMgLTE0OSAtMjMgLTIwNSAtMTAzIC0yOTcgLTM3MiAtNDg0IC02NzEgLTQ2NyAtNDcgMiAtMTA5IDEwIC0xMzcgMTYKbC01MiAxMiA1IDEwMiBjNiAxMTcgLTEzIDI5MCAtNTggNTI0IC00NCAyMzAgLTU5IDM0NiAtNTkgNDgwIGwwIDEyMiAzMSAxNwpjMTM1IDY5IDMxMSA4OCA0NjUgNDl6Ii8+CjxwYXRoIGQ9Ik0yMDcyIDMyNDggbDMgLTExMyAzOCAtMyBjMjMgLTIgMzcgLTggMzcgLTE3IDAgLTI3IDMxIC00NSA3NiAtNDUKNDYgMCA3MSAtMjMgNDQgLTQwIC0xMSAtNyAtMTEgLTE0IC0yIC0zNCAxNSAtMzMgMjkgLTMzIDQ1IDEgOSAyMSA5IDI3IC0xIDMxCi02IDIgLTEyIDEyIC0xMiAyMiAwIDI3IC0yMSAzOCAtNzUgNDIgLTM3IDIgLTUxIDcgLTUzIDIwIC0yIDEzIDUgMTcgMzUgMjAKbDM4IDMgMyA4OSBjMyA4MCAxIDkxIC0xOSAxMTIgLTE5IDIxIC0zMiAyNCAtOTEgMjQgbC02OSAwIDMgLTExMnogbTEwOCA3NwpjMCAtMjAgNSAtMjUgMjUgLTI1IDI0IDAgMjUgLTIgMjUgLTcwIGwwIC03MCAtNzAgMCAtNzAgMCAwIDk1IDAgOTUgNDUgMCBjNDEKMCA0NSAtMiA0NSAtMjV6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMzMTAgYzAgLTUgMTEgLTEwIDI1IC0xMCAxNCAwIDI1IDUgMjUgMTAgMCA2IC0xMSAxMCAtMjUgMTAKLTE0IDAgLTI1IC00IC0yNSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMyNzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMyMzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMxOTAgYzAgLTUgNSAtMTAgMTAgLTEwIDYgMCAxMCA1IDEwIDEwIDAgNiAtNCAxMCAtMTAgMTAgLTUgMAotMTAgLTQgLTEwIC0xMHoiLz4KPHBhdGggZD0iTTIxNDAgMzE5MCBjMCAtNSAxNiAtMTAgMzUgLTEwIDE5IDAgMzUgNSAzNSAxMCAwIDYgLTE2IDEwIC0zNSAxMAotMTkgMCAtMzUgLTQgLTM1IC0xMHoiLz4KPHBhdGggZD0iTTIzNDIgMzI0OCBsMyAtMTEzIDQzIC0zIDQyIC0zIDAgLTQ5IGMwIC0zNCAtNCAtNTAgLTE2IC01NCAtMTQgLTUKLTEzIC05IDMgLTM2IGwxOCAtMzAgMTcgMjIgYzIwIDI2IDIzIDQ4IDggNDggLTUgMCAtMTAgMjIgLTEwIDQ5IGwwIDUwIDM4IDMKMzcgMyAzIDg0IGMzIDgwIDEgODUgLTI0IDExMyAtMjUgMjUgLTM0IDI4IC05NiAyOCBsLTY5IDAgMyAtMTEyeiBtMTE2IDc1IGMyCi0xNCAxMSAtMjMgMjUgLTI1IDIwIC0zIDIyIC0xMCAyNSAtNzAgbDMgLTY4IC03NiAwIC03NSAwIDAgOTYgMCA5NSA0OCAtMwpjNDAgLTMgNDcgLTYgNTAgLTI1eiIvPgo8cGF0aCBkPSJNMjM4MCAzMzEwIGMwIC01IDE0IC0xMCAzMCAtMTAgMTcgMCAzMCA1IDMwIDEwIDAgNiAtMTMgMTAgLTMwIDEwCi0xNiAwIC0zMCAtNCAtMzAgLTEweiIvPgo8cGF0aCBkPSJNMjM4MCAzMjcwIGMwIC01IDUgLTEwIDEwIC0xMCA2IDAgMTAgNSAxMCAxMCAwIDYgLTQgMTAgLTEwIDEwIC01IDAKLTEwIC00IC0xMCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNDIwIDMyNzAgYzAgLTUgMTQgLTEwIDMwIC0xMCAxNyAwIDMwIDUgMzAgMTAgMCA2IC0xMyAxMCAtMzAgMTAKLTE2IDAgLTMwIC00IC0zMCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMzgwIDMyMzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMzgwIDMxOTAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjEyIDMyNDggbDMgLTExMyA0MyAtMyBjMzQgLTMgNDMgLTcgNDAgLTIwIC0yIC0xMyAtMTYgLTE4IC01MQotMjAgLTM5IC0zIC01MCAtOCAtNjQgLTMwIC0xMCAtMTUgLTIxIC0zMCAtMjYgLTMzIC04IC02IDE4IC02OSAyOCAtNjkgNSAwCjM1IDU2IDM1IDY1IDAgMyAtNyA1IC0xNSA1IC04IDAgLTE1IDQgLTE1IDggMCAxOSAyNyAzMiA2NSAzMiA0NCAwIDY1IDEzIDY1CjQxIDAgMTMgMTAgMTkgMzggMjEgbDM3IDMgMyA4NiBjMiA3NCAwIDg5IC0xOCAxMTIgLTIwIDI1IC0yNyAyNyAtOTYgMjcgbC03NQowIDMgLTExMnogbTExOCA3NyBjMCAtMjAgNSAtMjUgMjUgLTI1IDI0IDAgMjUgLTIgMjUgLTcwIGwwIC03MCAtNzUgMCAtNzUgMAowIDk1IDAgOTUgNTAgMCBjNDcgMCA1MCAtMiA1MCAtMjV6Ii8+CjxwYXRoIGQ9Ik0yNjU1IDMzMTAgYy00IC02IDcgLTEwIDI0IC0xMCAxNyAwIDMxIDUgMzEgMTAgMCA2IC0xMSAxMCAtMjQgMTAKLTE0IDAgLTI4IC00IC0zMSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjUwIDMyNzAgYzAgLTUgMjUgLTEwIDU1IC0xMCAzMCAwIDU1IDUgNTUgMTAgMCA2IC0yNSAxMCAtNTUgMTAKLTMwIDAgLTU1IC00IC01NSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjUwIDMyMzAgYzAgLTUgMTYgLTEwIDM1IC0xMCAxOSAwIDM1IDUgMzUgMTAgMCA2IC0xNiAxMCAtMzUgMTAKLTE5IDAgLTM1IC00IC0zNSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNzQwIDMyMzAgYzAgLTUgNSAtMTAgMTAgLTEwIDYgMCAxMCA1IDEwIDEwIDAgNiAtNCAxMCAtMTAgMTAgLTUgMAotMTAgLTQgLTEwIC0xMHoiLz4KPHBhdGggZD0iTTI2NTAgMzE5MCBjMCAtNSAyNSAtMTAgNTUgLTEwIDMwIDAgNTUgNSA1NSAxMCAwIDYgLTI1IDEwIC01NSAxMAotMzAgMCAtNTUgLTQgLTU1IC0xMHoiLz4KPHBhdGggZD0iTTIzNjAgMjk0MCBjLTU2IC0xMCAtMTAyIC0yOCAtMTEyIC00MyAtNCAtNyAtOCAtNzMgLTggLTE0OCAwIC0xNTIKMiAtMTU2IDczIC0xNzkgNTYgLTE4IDIzMiAtOSAyNzUgMTMgbDMyIDE4IDAgMTQ5IDAgMTQ5IC0yOCAxNSBjLTI5IDE1IC0xMzIKMzcgLTE2NiAzNSAtMTIgLTEgLTQxIC01IC02NiAtOXogbTE4MCAtMzMgYzU3IC0xNSA1OSAtMzcgNSAtNTUgLTQ4IC0xNiAtMjA1Ci0xMiAtMjQ5IDcgLTI3IDExIC0yOCAxMyAtMTMgMjggMzAgMzEgMTcyIDQyIDI1NyAyMHogbS0xNzAgLTg4IGM2MCAtOSAxODYgMQoyMTEgMTcgNSAzIDkgLTggOSAtMjQgMCAtNDIgLTQxIC01NyAtMTYwIC01NyAtMTEzIDEgLTE1MyAxNSAtMTU4IDU5IC0zIDI0Ci0xIDI4IDE1IDIxIDEwIC00IDQ3IC0xMSA4MyAtMTZ6IG02MCAtODQgYzU4IDAgMTE4IDQgMTMzIDggMjcgNyAyOCA2IDI1IC0yMAotMyAtMjQgLTEwIC0zMCAtNTMgLTQxIC02NCAtMTcgLTIwOCAtOSAtMjQxIDEzIC0xMyA4IC0yNCAyNSAtMjQgMzYgMCAxOCA0CjIwIDI4IDEzIDE1IC01IDc0IC05IDEzMiAtOXogbS01OSAtODYgYzYzIC05IDE1NiAtMiAyMDIgMTYgMTQgNiAxNyAyIDE3IC0yMwowIC0yNiAtNSAtMzIgLTM3IC00MyAtMjEgLTggLTc4IC0xMyAtMTI4IC0xMyAtMTA4IDAgLTE0OCAxNSAtMTUzIDU4IC0zIDI0Ci0xIDI4IDE1IDIxIDEwIC00IDQ4IC0xMSA4NCAtMTZ6Ii8+CjwvZz4KPC9zdmc+Cg==" alt="" style="height:30px;width:auto;filter:brightness(0);display:block;"/> DIVYZE<span class="blink">_</span></a>
+  <ul class="nm">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#dash-section">Work</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a class="nc" href="#contact">Engage &rarr;</a>
+</nav>
+
+<!-- MARQUEE DARK -->
+<div class="mq">
+  <div class="mq-t">
+    <span class="mi">Market Research</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">B2B Intelligence</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Data Analysis</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Lead Research</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Strategic Insight</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Delegate Profiling</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Pipeline Intelligence</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Global Conferences</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Market Research</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">B2B Intelligence</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Data Analysis</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Lead Research</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Strategic Insight</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Delegate Profiling</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Pipeline Intelligence</span><span class="ms">&nbsp;/&nbsp;</span>
+    <span class="mi">Global Conferences</span><span class="ms">&nbsp;/&nbsp;</span>
+  </div>
+</div>
+
+<!-- HERO PINNED -->
+<div id="hero-pin">
+  <div id="hero-sticky">
+    <canvas id="hbg"></canvas>
+    <div class="ftag" id="ft1" style="top:20%;right:7%">Structured Thinking</div>
+    <div class="ftag" id="ft2" style="top:36%;right:19%">Data&ndash;Driven</div>
+    <div class="ftag" id="ft3" style="top:58%;right:8%">Global Reach</div>
+    <div class="ftag" id="ft4" style="top:24%;left:42%">B2B Research</div>
+    <div class="ftag" id="ft5" style="top:70%;left:44%">Precision</div>
+    <div class="h-content">
+      <div class="h-eye"><span id="hEye">[ Research Engine v2.0 ]</span></div>
+      <h1 class="h-title" id="hTitle">
+        <span class="ww"><span>A</span></span>
+        <span class="ww"><span>Device</span></span>
+        <span class="ww"><span>for</span></span>
+        <span class="ww"><span class="h-em">Potential.</span></span>
+      </h1>
+      <div class="h-bot" id="hBot">
+        <p class="h-desc">Transforming raw data, untapped capability, and unclear problems into structured insights that drive decisions.</p>
+        <div class="h-acts">
+          <a href="#services" class="btn-dk">Explore Services</a>
+          <a href="#about" class="btn-ol">About Divyze</a>
+        </div>
+      </div>
+    </div>
+    <div class="h-scr" id="hScr"><div class="scr-ln"></div><span>Scroll</span></div>
+  </div>
+</div>
+
+<!-- ════ VISUAL 1: ANIMATED DASHBOARD ════ -->
+<section id="dash-section">
+  <div class="dash-wrap">
+    <div class="dash-text rl">
+      <div class="dash-tag">Intelligence at Work</div>
+      <h2>Data transformed into<br/><em>structured insight.</em></h2>
+      <p>Every research engagement produces real, measurable output — from pipeline opportunities to market intelligence that drives conference strategy across four global markets.</p>
+    </div>
+    <div class="dash-visual rr" id="dashVisual">
+      <div class="dash-header">
+        <span class="dash-header-title">Divyze Research Dashboard</span>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <div class="dash-dot"></div>
+          <span style="font-size:.45rem;letter-spacing:.12em;color:rgba(245,241,234,.25)">LIVE</span>
+        </div>
+      </div>
+      <!-- BAR CHART -->
+      <div class="dash-chart" id="dashBars">
+        <div class="dash-bar" data-h="45" data-label="Q1"></div>
+        <div class="dash-bar" data-h="62" data-label="Q2"></div>
+        <div class="dash-bar" data-h="38" data-label="Q3"></div>
+        <div class="dash-bar" data-h="78" data-label="Q4"></div>
+        <div class="dash-bar" data-h="55" data-label="Q1"></div>
+        <div class="dash-bar" data-h="90" data-label="Q2"></div>
+        <div class="dash-bar" data-h="72" data-label="Q3"></div>
+        <div class="dash-bar" data-h="85" data-label="Q4"></div>
+      </div>
+      <!-- SPARKLINE -->
+      <div class="dash-sparkline">
+        <div class="dash-spark-label">Pipeline Trend</div>
+        <svg id="sparkSvg" viewBox="0 0 300 50">
+          <defs>
+            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4a7c6b" stop-opacity=".6"/>
+              <stop offset="100%" stop-color="#4a7c6b" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="spark-fill" id="sparkFill" d="M0,40 C30,35 60,20 90,25 C120,30 150,10 180,15 C210,20 240,8 270,12 L300,10 L300,50 L0,50 Z"/>
+          <path class="spark-path" id="sparkPath" d="M0,40 C30,35 60,20 90,25 C120,30 150,10 180,15 C210,20 240,8 270,12 L300,10"/>
+        </svg>
+      </div>
+      <!-- STATS ROW -->
+      <div class="dash-stats">
+        <div class="ds">
+          <div class="ds-num" id="cnt1">0</div>
+          <div class="ds-lbl">Years Active</div>
+        </div>
+        <div class="ds">
+          <div class="ds-num"><em id="cnt2">0</em>+</div>
+          <div class="ds-lbl">Opportunities</div>
+        </div>
+        <div class="ds">
+          <div class="ds-num" id="cnt3">0</div>
+          <div class="ds-lbl">Markets</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ VISUAL 2: MARKETS GLOBE ════ -->
+<section id="markets-section">
+  <div class="mkt-wrap">
+    <div class="globe-wrap rl" id="globeWrap">
+      <svg id="globeSvg" viewBox="0 0 360 360">
+        <!-- Main globe -->
+        <circle class="globe-circle" cx="180" cy="180" r="140"/>
+        <!-- Meridians -->
+        <ellipse class="globe-meridian" cx="180" cy="180" rx="70" ry="140"/>
+        <ellipse class="globe-meridian" cx="180" cy="180" rx="140" ry="55"/>
+        <ellipse class="globe-meridian" cx="180" cy="180" rx="110" ry="140"/>
+        <!-- Rotating ring -->
+        <ellipse class="globe-ring" cx="180" cy="180" rx="155" ry="45"/>
+        <!-- Market dots — AU, NZ, UK, US -->
+        <circle class="globe-dot" id="gAU" cx="255" cy="220" r="6"/>
+        <circle class="globe-dot" id="gNZ" cx="275" cy="235" r="5"/>
+        <circle class="globe-dot" id="gUK" cx="160" cy="120" r="6"/>
+        <circle class="globe-dot" id="gUS" cx="95"  cy="148" r="6"/>
+        <!-- Connecting lines -->
+        <path class="globe-line" id="gl1" d="M255,220 Q180,180 160,120"/>
+        <path class="globe-line" id="gl2" d="M160,120 Q130,130 95,148"/>
+        <path class="globe-line" id="gl3" d="M95,148 Q170,200 255,220"/>
+        <path class="globe-line" id="gl4" d="M255,220 Q265,228 275,235"/>
+        <!-- Labels -->
+        <text class="globe-label" id="lbAU" x="264" y="216" font-family="Space Mono" font-size="8">AU</text>
+        <text class="globe-label" id="lbNZ" x="280" y="233" font-family="Space Mono" font-size="8">NZ</text>
+        <text class="globe-label" id="lbUK" x="142" y="116" font-family="Space Mono" font-size="8">UK</text>
+        <text class="globe-label" id="lbUS" x="76"  cy="148" y="144" font-family="Space Mono" font-size="8">US</text>
+        <!-- Centre hub -->
+        <circle cx="180" cy="180" r="8" fill="#2d4a3e" opacity=".6"/>
+        <circle cx="180" cy="180" r="4" fill="#4a7c6b" opacity=".9"/>
+      </svg>
+    </div>
+    <div class="rr">
+      <div class="mkt-tag rv">Global Presence</div>
+      <h2 class="mkt-title rv d1">Research across<br/><em>four markets.</em></h2>
+      <p class="mkt-desc rv d2">From APAC to the Atlantic — delivering B2B market intelligence, delegate profiling, and conference research for Aventedge events worldwide.</p>
+      <div class="mkt-pills" id="mktPills">
+        <span class="mkt-pill">&#127462;&#127482; Australia</span>
+        <span class="mkt-pill">&#127475;&#127487; New Zealand</span>
+        <span class="mkt-pill">&#127468;&#127463; United Kingdom</span>
+        <span class="mkt-pill">&#127482;&#127480; United States</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ VISUAL 3: RESEARCH FLOW ════ -->
+<section id="flow-section">
+  <div class="flow-wrap">
+    <div class="rv">
+      <div class="sec-tag" style="display:flex">The Divyze Process</div>
+      <h2 class="sec-ttl2 rv d1" style="margin-bottom:3.5rem">How raw data becomes<br/><em>actionable intelligence.</em></h2>
+    </div>
+    <!-- 3-node flow -->
+    <div class="flow-grid rv d1">
+      <div class="flow-node" id="fn1">
+        <div class="fn-tag">Step 01</div>
+        <div class="fn-title">Data &amp; Research</div>
+        <div class="fn-desc">Raw B2B data, market signals, delegate profiles — we gather everything.</div>
+      </div>
+      <div class="flow-arrow" id="fa1">
+        <svg width="40" height="20" viewBox="0 0 40 20">
+          <path d="M0,10 L32,10 M26,4 L38,10 L26,16" stroke="#4a7c6b" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="flow-node" id="fn2" style="transition-delay:.15s">
+        <div class="fn-tag">Step 02</div>
+        <div class="fn-title">Analysis &amp; Logic</div>
+        <div class="fn-desc">Segmentation, validation, pattern recognition — structured thinking applied.</div>
+      </div>
+      <div class="flow-arrow" id="fa2" style="transition-delay:.2s">
+        <svg width="40" height="20" viewBox="0 0 40 20">
+          <path d="M0,10 L32,10 M26,4 L38,10 L26,16" stroke="#4a7c6b" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="flow-node" id="fn3" style="transition-delay:.3s">
+        <div class="fn-tag">Step 03</div>
+        <div class="fn-title">Insight &amp; Output</div>
+        <div class="fn-desc">Structured reports and qualified intelligence — ready to act on.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <p class="sec-tag rv">What We Do</p>
+  <h2 class="sec-ttl2 rv d1">Four pillars of <em>structured insight.</em></h2>
+  <div class="stabs rv d2">
+    <button class="tab-btn active" data-tab="0">Market &amp; Business Research</button>
+    <button class="tab-btn" data-tab="1">Data Analysis &amp; Insights</button>
+    <button class="tab-btn" data-tab="2">Lead &amp; Intelligence Research</button>
+    <button class="tab-btn" data-tab="3">Strategic Support</button>
+  </div>
+  <div class="tab-panel active" data-panel="0">
+    <div class="rl"><div class="p-num">01 &mdash;</div><h3 class="p-title">Market &amp; <em>Business</em> Research</h3><p class="p-desc">Structured research to understand markets, customers, and global opportunities — with precision.</p><a href="#contact" class="p-cta">Start a Project &rarr;</a></div>
+    <ul class="p-list rr"><li>Industry &amp; Competitor Analysis</li><li>Market Sizing &amp; Segmentation</li><li>Customer &amp; Delegate Profiling</li><li>Global Market Entry Research</li><li>Conference &amp; Event Intelligence</li></ul>
+  </div>
+  <div class="tab-panel" data-panel="1">
+    <div class="rl"><div class="p-num">02 &mdash;</div><h3 class="p-title">Data Analysis <em>&amp;</em> Insights</h3><p class="p-desc">Cleaning, analyzing, and translating complex data into actionable intelligence.</p><a href="#contact" class="p-cta">Start a Project &rarr;</a></div>
+    <ul class="p-list rr"><li>Data Cleaning &amp; Structuring</li><li>Pipeline &amp; CRM Data Analysis</li><li>Sales Performance Reporting</li><li>Excel &amp; Power BI Dashboards</li><li>Trend &amp; Pattern Identification</li></ul>
+  </div>
+  <div class="tab-panel" data-panel="2">
+    <div class="rl"><div class="p-num">03 &mdash;</div><h3 class="p-title">Lead &amp; <em>Intelligence</em> Research</h3><p class="p-desc">Targeted B2B data research to support sales pipelines, growth teams, and delegate profiling.</p><a href="#contact" class="p-cta">Start a Project &rarr;</a></div>
+    <ul class="p-list rr"><li>B2B Lead Generation</li><li>Delegate &amp; Attendee Research</li><li>LinkedIn &amp; Sales Navigator Prospecting</li><li>Contact Database Building</li><li>Decision-Maker Mapping</li></ul>
+  </div>
+  <div class="tab-panel" data-panel="3">
+    <div class="rl"><div class="p-num">04 &mdash;</div><h3 class="p-title">Strategic <em>Support</em></h3><p class="p-desc">Research-backed inputs for planning, campaign execution, and cross-functional alignment.</p><a href="#contact" class="p-cta">Start a Project &rarr;</a></div>
+    <ul class="p-list rr"><li>Go-to-Market Research Support</li><li>Campaign Intelligence Briefs</li><li>Cross-Market Opportunity Mapping</li><li>Stakeholder Research &amp; Profiling</li><li>Ad-hoc Research &amp; Analysis</li></ul>
+  </div>
+</section>
+
+<!-- MARQUEE CREAM -->
+<div class="mq-cr">
+  <div class="mq-t rev" style="animation-duration:20s">
+    <span class="mi-c">structured insight</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">data clarity</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">research precision</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">global intelligence</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">b2b decisions</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">analytical thinking</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">structured insight</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">data clarity</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">research precision</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">global intelligence</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">b2b decisions</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+    <span class="mi-c">analytical thinking</span><span class="ms-c">&nbsp;&bull;&nbsp;</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PROCESS -->
+<section id="process">
+  <p class="sec-tag rv">How We Think</p>
+  <h2 class="sec-ttl2 rv d1">From raw data to <em>actionable insight.</em></h2>
+  <div class="proc-wrap">
+    <div class="proc-steps stag">
+      <div class="proc-step"><div class="s-lbl">Input</div><div class="s-con"><h3 class="sa">Data &amp; Ambiguity</h3><p>Raw information, unclear problems — whatever state your data is in, we begin here.</p></div></div>
+      <div class="proc-step"><div class="s-lbl">Process</div><div class="s-con"><h3 class="sa2">Analysis &amp; Logic</h3><p>Research-driven frameworks and segmentation logic applied with rigor.</p></div></div>
+      <div class="proc-step"><div class="s-lbl">Output</div><div class="s-con"><h3>Actionable Insight</h3><p>Structured reports and intelligence that can be immediately acted upon.</p></div></div>
+    </div>
+    <div class="proc-vis rv">
+      <div class="orb orb-1"><div class="orb-dot"></div></div>
+      <div class="orb orb-2"><div class="orb-dot" style="top:auto;bottom:-2.5px"></div></div>
+      <div class="dev-box">
+        <div style="text-align:center">
+          <span class="dw">DATA</span><span class="da">&#8595;</span>
+          <span class="dw active">DIVYZE</span><span class="da">&#8595;</span>
+          <span class="dw">INSIGHT</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <p class="sec-tag rv">Projects</p>
+  <h2 class="sec-ttl2 rv d1">Work that speaks<br/>through <em>intelligence.</em></h2>
+  <div class="pgrid">
+    <div class="pc rv" data-href="#contact"><div class="pc-line"></div><div class="pc-in"><div class="pc-n">01</div><span class="pc-ico">&#9713;</span><div class="pc-tag">B2B Research &mdash; AU / NZ</div><div class="pc-ttl">Conference Market Intelligence</div><div class="pc-desc">Delegate profiling and market research for Aventedge B2B events across Australia and New Zealand.</div></div><div class="pc-arr">&#8599;</div></div>
+    <div class="pc rv d1" data-href="#contact"><div class="pc-line"></div><div class="pc-in"><div class="pc-n">02</div><span class="pc-ico">&#9672;</span><div class="pc-tag">Sales Intelligence &mdash; UK / US</div><div class="pc-ttl">Pipeline &amp; Lead Research</div><div class="pc-desc">B2B lead generation and pipeline research supporting sales teams across UK and US conference markets.</div></div><div class="pc-arr">&#8599;</div></div>
+    <div class="pc rv d2" data-href="#contact"><div class="pc-line"></div><div class="pc-in"><div class="pc-n">03</div><span class="pc-ico">&#9670;</span><div class="pc-tag">Coming Soon</div><div class="pc-ttl">More Projects</div><div class="pc-desc">Additional case studies and research projects being documented. Get in touch to learn more.</div></div><div class="pc-arr">&#8599;</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="sec-tag rv">Behind Divyze</p>
+  <h2 class="sec-ttl2 rv d1">Analytical thinking,<br/><em>human-driven.</em></h2>
+  <div class="ab-grid">
+    <div class="rl"><p>Divyze is built at the intersection of <strong>analytics, research, and structured thinking</strong> &mdash; designed to help individuals and organizations make better, faster decisions.</p><p>Founded by <strong>Divin N R</strong>, a detail-oriented Market Research Analyst with hands-on experience in B2B data research, delegate profiling, and market intelligence for global conferences across Australia, New Zealand, the UK, and the United States.</p><p>We operate like a precision instrument &mdash; taking in complexity and outputting clarity.</p></div>
+    <div class="rr"><p>Market Research Analyst at <strong>Uniqleads Research</strong>, an Aventedge company &mdash; delivering B2B intelligence for conferences across AU, NZ, UK, and US markets since February 2023.</p><p>Prior to Divyze, worked as Admin Executive at <strong>S Squared Architects</strong> (2021&ndash;2022), building a foundation in operational coordination and stakeholder management.</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <p class="sec-tag sec-tag2 rv" style="justify-content:center">Get In Touch</p>
+  <h2 class="sec-ttl rv d1" style="max-width:100%;text-align:center">Ready to turn data<br/>into <em>decisions?</em></h2>
+  <p class="c-sub rv d2">Whether you need market research, data analysis, or strategic insight &mdash; let's build something structured together.</p>
+  <div class="cc rv d3">
+    <a href="mailto:divinnr121@gmail.com" class="ce">divinnr121@gmail.com</a>
+    <div class="cl">
+      <a href="https://www.linkedin.com/in/divin-n-r" class="cli" target="_blank">LinkedIn</a>
+      <a href="tel:+917025374633" class="cli">+91 7025374633</a>
+      <a href="https://divyze.github.io" class="cli" target="_blank">divyze.github.io</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <canvas id="fcanv"></canvas>
+  <div class="fi">
+    <span class="fl"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNTAwLjAwMDAwMHB0IiBoZWlnaHQ9IjUwMC4wMDAwMDBwdCIgdmlld0JveD0iMCAwIDUwMC4wMDAwMDAgNTAwLjAwMDAwMCIKIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIG1lZXQiPgoKPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsNTAwLjAwMDAwMCkgc2NhbGUoMC4xMDAwMDAsLTAuMTAwMDAwKSIKZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSJub25lIj4KPHBhdGggZD0iTTIwOTQgMzk2NSBjLTMzIC04IC04NCAtMjMgLTExMyAtMzQgLTQyIC0xNiAtNjcgLTE5IC0xMjIgLTE0IGwtNjkKNiAtMjYgLTU5IGMtNTUgLTEyNCAtNjcgLTE5NCAtNjcgLTM4NCAwIC0xNDUgNCAtMTk5IDI2IC0zMTUgODMgLTQ1NSA4MCAtNDMxCjgxIC02MjAgMSAtMTkyIC02IC0yMzcgLTYwIC0zNzQgLTE0IC0zNSAtMjQgLTY1IC0yMiAtNjYgMiAtMiA3MSAtOCAxNTMgLTE0CjgzIC01IDE5MSAtMTkgMjQwIC0zMCAyNTIgLTU3IDU0NiA5IDc2MyAxNzEgNTEgMzggNTQgMzkgNzMgMjIgMTUgLTEzIDE5IC0zMQoxOSAtNzggbDAgLTYxIDIyMCAtMjIwIGMxMjAgLTEyMCAyMjEgLTIxNyAyMjMgLTIxNSAyIDMgMTIgMjUgMjEgNDkgMTAgMjUgMjYKNTggMzggNzMgMjEgMzAgMTA1IDc4IDEzNiA3OCAxMCAwIDIyIDMgMjYgNyA0IDQgLTk0IDEwNyAtMjE2IDIzMCBsLTIyMyAyMjMKLTYxIDAgYy00NyAwIC02NSA0IC03OCAxOSAtMTcgMTggLTE1IDIyIDMwIDgzIDYwIDgwIDEyNiAyMjAgMTU0IDMyMyAyOCAxMDIKMzcgMjgzIDIxIDM5NSAtNTggMzk1IC0zNjggNzIyIC03NjMgODA1IC04NiAxOSAtMzE5IDE4IC00MDQgMHogbTM3MiAtMzAwCmMxMTMgLTI5IDIyMSAtOTEgMzA0IC0xNzQgODUgLTg2IDEyOSAtMTU2IDE2OCAtMjYzIDI0IC02NiAyNyAtODYgMjcgLTIxMyAwCi0xMjAgLTMgLTE0OSAtMjMgLTIwNSAtMTAzIC0yOTcgLTM3MiAtNDg0IC02NzEgLTQ2NyAtNDcgMiAtMTA5IDEwIC0xMzcgMTYKbC01MiAxMiA1IDEwMiBjNiAxMTcgLTEzIDI5MCAtNTggNTI0IC00NCAyMzAgLTU5IDM0NiAtNTkgNDgwIGwwIDEyMiAzMSAxNwpjMTM1IDY5IDMxMSA4OCA0NjUgNDl6Ii8+CjxwYXRoIGQ9Ik0yMDcyIDMyNDggbDMgLTExMyAzOCAtMyBjMjMgLTIgMzcgLTggMzcgLTE3IDAgLTI3IDMxIC00NSA3NiAtNDUKNDYgMCA3MSAtMjMgNDQgLTQwIC0xMSAtNyAtMTEgLTE0IC0yIC0zNCAxNSAtMzMgMjkgLTMzIDQ1IDEgOSAyMSA5IDI3IC0xIDMxCi02IDIgLTEyIDEyIC0xMiAyMiAwIDI3IC0yMSAzOCAtNzUgNDIgLTM3IDIgLTUxIDcgLTUzIDIwIC0yIDEzIDUgMTcgMzUgMjAKbDM4IDMgMyA4OSBjMyA4MCAxIDkxIC0xOSAxMTIgLTE5IDIxIC0zMiAyNCAtOTEgMjQgbC02OSAwIDMgLTExMnogbTEwOCA3NwpjMCAtMjAgNSAtMjUgMjUgLTI1IDI0IDAgMjUgLTIgMjUgLTcwIGwwIC03MCAtNzAgMCAtNzAgMCAwIDk1IDAgOTUgNDUgMCBjNDEKMCA0NSAtMiA0NSAtMjV6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMzMTAgYzAgLTUgMTEgLTEwIDI1IC0xMCAxNCAwIDI1IDUgMjUgMTAgMCA2IC0xMSAxMCAtMjUgMTAKLTE0IDAgLTI1IC00IC0yNSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMyNzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMyMzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMTEwIDMxOTAgYzAgLTUgNSAtMTAgMTAgLTEwIDYgMCAxMCA1IDEwIDEwIDAgNiAtNCAxMCAtMTAgMTAgLTUgMAotMTAgLTQgLTEwIC0xMHoiLz4KPHBhdGggZD0iTTIxNDAgMzE5MCBjMCAtNSAxNiAtMTAgMzUgLTEwIDE5IDAgMzUgNSAzNSAxMCAwIDYgLTE2IDEwIC0zNSAxMAotMTkgMCAtMzUgLTQgLTM1IC0xMHoiLz4KPHBhdGggZD0iTTIzNDIgMzI0OCBsMyAtMTEzIDQzIC0zIDQyIC0zIDAgLTQ5IGMwIC0zNCAtNCAtNTAgLTE2IC01NCAtMTQgLTUKLTEzIC05IDMgLTM2IGwxOCAtMzAgMTcgMjIgYzIwIDI2IDIzIDQ4IDggNDggLTUgMCAtMTAgMjIgLTEwIDQ5IGwwIDUwIDM4IDMKMzcgMyAzIDg0IGMzIDgwIDEgODUgLTI0IDExMyAtMjUgMjUgLTM0IDI4IC05NiAyOCBsLTY5IDAgMyAtMTEyeiBtMTE2IDc1IGMyCi0xNCAxMSAtMjMgMjUgLTI1IDIwIC0zIDIyIC0xMCAyNSAtNzAgbDMgLTY4IC03NiAwIC03NSAwIDAgOTYgMCA5NSA0OCAtMwpjNDAgLTMgNDcgLTYgNTAgLTI1eiIvPgo8cGF0aCBkPSJNMjM4MCAzMzEwIGMwIC01IDE0IC0xMCAzMCAtMTAgMTcgMCAzMCA1IDMwIDEwIDAgNiAtMTMgMTAgLTMwIDEwCi0xNiAwIC0zMCAtNCAtMzAgLTEweiIvPgo8cGF0aCBkPSJNMjM4MCAzMjcwIGMwIC01IDUgLTEwIDEwIC0xMCA2IDAgMTAgNSAxMCAxMCAwIDYgLTQgMTAgLTEwIDEwIC01IDAKLTEwIC00IC0xMCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNDIwIDMyNzAgYzAgLTUgMTQgLTEwIDMwIC0xMCAxNyAwIDMwIDUgMzAgMTAgMCA2IC0xMyAxMCAtMzAgMTAKLTE2IDAgLTMwIC00IC0zMCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMzgwIDMyMzAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yMzgwIDMxOTAgYzAgLTUgMjMgLTEwIDUwIC0xMCAyOCAwIDUwIDUgNTAgMTAgMCA2IC0yMiAxMCAtNTAgMTAKLTI3IDAgLTUwIC00IC01MCAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjEyIDMyNDggbDMgLTExMyA0MyAtMyBjMzQgLTMgNDMgLTcgNDAgLTIwIC0yIC0xMyAtMTYgLTE4IC01MQotMjAgLTM5IC0zIC01MCAtOCAtNjQgLTMwIC0xMCAtMTUgLTIxIC0zMCAtMjYgLTMzIC04IC02IDE4IC02OSAyOCAtNjkgNSAwCjM1IDU2IDM1IDY1IDAgMyAtNyA1IC0xNSA1IC04IDAgLTE1IDQgLTE1IDggMCAxOSAyNyAzMiA2NSAzMiA0NCAwIDY1IDEzIDY1CjQxIDAgMTMgMTAgMTkgMzggMjEgbDM3IDMgMyA4NiBjMiA3NCAwIDg5IC0xOCAxMTIgLTIwIDI1IC0yNyAyNyAtOTYgMjcgbC03NQowIDMgLTExMnogbTExOCA3NyBjMCAtMjAgNSAtMjUgMjUgLTI1IDI0IDAgMjUgLTIgMjUgLTcwIGwwIC03MCAtNzUgMCAtNzUgMAowIDk1IDAgOTUgNTAgMCBjNDcgMCA1MCAtMiA1MCAtMjV6Ii8+CjxwYXRoIGQ9Ik0yNjU1IDMzMTAgYy00IC02IDcgLTEwIDI0IC0xMCAxNyAwIDMxIDUgMzEgMTAgMCA2IC0xMSAxMCAtMjQgMTAKLTE0IDAgLTI4IC00IC0zMSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjUwIDMyNzAgYzAgLTUgMjUgLTEwIDU1IC0xMCAzMCAwIDU1IDUgNTUgMTAgMCA2IC0yNSAxMCAtNTUgMTAKLTMwIDAgLTU1IC00IC01NSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNjUwIDMyMzAgYzAgLTUgMTYgLTEwIDM1IC0xMCAxOSAwIDM1IDUgMzUgMTAgMCA2IC0xNiAxMCAtMzUgMTAKLTE5IDAgLTM1IC00IC0zNSAtMTB6Ii8+CjxwYXRoIGQ9Ik0yNzQwIDMyMzAgYzAgLTUgNSAtMTAgMTAgLTEwIDYgMCAxMCA1IDEwIDEwIDAgNiAtNCAxMCAtMTAgMTAgLTUgMAotMTAgLTQgLTEwIC0xMHoiLz4KPHBhdGggZD0iTTI2NTAgMzE5MCBjMCAtNSAyNSAtMTAgNTUgLTEwIDMwIDAgNTUgNSA1NSAxMCAwIDYgLTI1IDEwIC01NSAxMAotMzAgMCAtNTUgLTQgLTU1IC0xMHoiLz4KPHBhdGggZD0iTTIzNjAgMjk0MCBjLTU2IC0xMCAtMTAyIC0yOCAtMTEyIC00MyAtNCAtNyAtOCAtNzMgLTggLTE0OCAwIC0xNTIKMiAtMTU2IDczIC0xNzkgNTYgLTE4IDIzMiAtOSAyNzUgMTMgbDMyIDE4IDAgMTQ5IDAgMTQ5IC0yOCAxNSBjLTI5IDE1IC0xMzIKMzcgLTE2NiAzNSAtMTIgLTEgLTQxIC01IC02NiAtOXogbTE4MCAtMzMgYzU3IC0xNSA1OSAtMzcgNSAtNTUgLTQ4IC0xNiAtMjA1Ci0xMiAtMjQ5IDcgLTI3IDExIC0yOCAxMyAtMTMgMjggMzAgMzEgMTcyIDQyIDI1NyAyMHogbS0xNzAgLTg4IGM2MCAtOSAxODYgMQoyMTEgMTcgNSAzIDkgLTggOSAtMjQgMCAtNDIgLTQxIC01NyAtMTYwIC01NyAtMTEzIDEgLTE1MyAxNSAtMTU4IDU5IC0zIDI0Ci0xIDI4IDE1IDIxIDEwIC00IDQ3IC0xMSA4MyAtMTZ6IG02MCAtODQgYzU4IDAgMTE4IDQgMTMzIDggMjcgNyAyOCA2IDI1IC0yMAotMyAtMjQgLTEwIC0zMCAtNTMgLTQxIC02NCAtMTcgLTIwOCAtOSAtMjQxIDEzIC0xMyA4IC0yNCAyNSAtMjQgMzYgMCAxOCA0CjIwIDI4IDEzIDE1IC01IDc0IC05IDEzMiAtOXogbS01OSAtODYgYzYzIC05IDE1NiAtMiAyMDIgMTYgMTQgNiAxNyAyIDE3IC0yMwowIC0yNiAtNSAtMzIgLTM3IC00MyAtMjEgLTggLTc4IC0xMyAtMTI4IC0xMyAtMTA4IDAgLTE0OCAxNSAtMTUzIDU4IC0zIDI0Ci0xIDI4IDE1IDIxIDEwIC00IDQ4IC0xMSA4NCAtMTZ6Ii8+CjwvZz4KPC9zdmc+Cg==" alt="" style="height:20px;width:auto;filter:invert(1) opacity(.5);"/> DIVYZE<span class="blink">_</span></span>
+    <span class="fcp">&copy; 2026 Divyze. All rights reserved.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* CURSOR */
+var cur=document.getElementById('cur'),curD=document.getElementById('curD'),coords=document.getElementById('coords');
+var mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',function(e){
+  mx=e.clientX;my=e.clientY;
+  curD.style.left=mx+'px';curD.style.top=my+'px';
+  coords.innerHTML='X '+String(Math.round(mx)).padStart(4,'0')+'<br/>Y '+String(Math.round(my)).padStart(4,'0');
+});
+(function lp(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cur.style.left=rx+'px';cur.style.top=ry+'px';requestAnimationFrame(lp)})();
+document.querySelectorAll('a,button,.pc').forEach(function(el){
+  el.addEventListener('mouseenter',function(){cur.style.width='44px';cur.style.height='44px'});
+  el.addEventListener('mouseleave',function(){cur.style.width='10px';cur.style.height='10px'});
+});
+
+/* HERO BG */
+var hbg=document.getElementById('hbg'),hx=hbg.getContext('2d');
+function rzH(){hbg.width=hbg.parentElement.offsetWidth;hbg.height=hbg.parentElement.offsetHeight}
+rzH();window.addEventListener('resize',rzH);
+var pts=[];
+for(var i=0;i<28;i++)pts.push({x:Math.random()*3000,y:Math.random()*900,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.18,r:.8+Math.random()*1.8,a:.03+Math.random()*.07});
+var hbars=[];for(var j=0;j<14;j++)hbars.push({h:.12+Math.random()*.52,c:0,s:.004+Math.random()*.006});
+var lph=0,gph=0;
+function drawHbg(){
+  var W=hbg.width,H=hbg.height;hx.clearRect(0,0,W,H);gph+=.0016;
+  for(var gx=0;gx<W;gx+=44)for(var gy=0;gy<H;gy+=44){
+    var p=Math.sin(gph+gx*.03+gy*.024)*.3+.7;
+    hx.beginPath();hx.arc(gx,gy,.8,0,Math.PI*2);hx.fillStyle='rgba(45,74,62,'+(0.045*p)+')';hx.fill();
+  }
+  for(var a=0;a<pts.length;a++)for(var b=a+1;b<pts.length;b++){
+    var dx=pts[a].x-pts[b].x,dy=pts[a].y-pts[b].y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<140){hx.beginPath();hx.moveTo(pts[a].x,pts[a].y);hx.lineTo(pts[b].x,pts[b].y);hx.strokeStyle='rgba(45,74,62,'+(0.05*(1-d/140))+')';hx.lineWidth=.4;hx.stroke()}
+  }
+  pts.forEach(function(n){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;
+    hx.beginPath();hx.arc(n.x,n.y,n.r,0,Math.PI*2);hx.fillStyle='rgba(45,74,62,'+n.a+')';hx.fill();
+  });
+  var bW=Math.min(W*.18,180),bH=Math.min(H*.15,100),bX=W-bW-W*.04,bY=H-bH-H*.06;
+  hx.beginPath();hx.moveTo(bX,bY+bH);hx.lineTo(bX+bW,bY+bH);hx.strokeStyle='rgba(45,74,62,.08)';hx.lineWidth=1;hx.stroke();
+  var bg=bW*.28/(hbars.length+1),bw=(bW*.72)/hbars.length;
+  hbars.forEach(function(bar,i){if(bar.c<bar.h)bar.c+=bar.s;
+    var bh2=bar.c*bH,bx2=bX+bg+i*(bw+bg),by2=bY+bH-bh2;
+    var g=hx.createLinearGradient(bx2,by2,bx2,bY+bH);g.addColorStop(0,'rgba(45,74,62,.22)');g.addColorStop(1,'rgba(45,74,62,.02)');
+    hx.fillStyle=g;hx.fillRect(bx2,by2,bw,bh2);
+  });
+  lph+=.018;
+  var lX=hbg.width*.04,lY=hbg.height*.1,lW=Math.min(hbg.width*.22,220),lH=Math.min(hbg.height*.09,65),n=50;
+  hx.beginPath();
+  for(var k=0;k<n;k++){var px=lX+(k/(n-1))*lW,py=lY+lH/2-(Math.sin(k*.18+lph)*.5+Math.sin(k*.07+lph*.4)*.5)*lH*.38;k===0?hx.moveTo(px,py):hx.lineTo(px,py);}
+  hx.strokeStyle='rgba(45,74,62,.12)';hx.lineWidth=1.2;hx.stroke();
+  requestAnimationFrame(drawHbg);
+}
+drawHbg();
+document.addEventListener('mousemove',function(e){hbg.style.transform='translate('+(( e.clientX/window.innerWidth-.5)*18)+'px,'+(( e.clientY/window.innerHeight-.5)*12)+'px) scale(1.04)'});
+
+/* INTRO COUNTER */
+document.body.style.overflow='hidden';
+var iNum=document.getElementById('iNum'),iBar=document.getElementById('iBar'),introEl=document.getElementById('intro');
+var dur=2600,t0=null;
+function ease(t){return t<.5?4*t*t*t:(t-1)*(2*t-2)*(2*t-2)+1}
+(function tick(ts){
+  if(!t0)t0=ts;var p=Math.min((ts-t0)/dur,1),e=ease(p);
+  iNum.textContent=Math.floor(e*100)+'%';iBar.style.width=(e*100)+'%';
+  if(p<1)requestAnimationFrame(tick);
+  else{iNum.textContent='100%';iBar.style.width='100%';
+    setTimeout(function(){introEl.classList.add('wipe');setTimeout(function(){introEl.style.display='none';document.body.style.overflow='';startHero()},860)},280);
+  }
+})(0);
+
+/* HERO REVEAL */
+function startHero(){
+  setTimeout(function(){document.getElementById('hEye').classList.add('up')},100);
+  document.querySelectorAll('.ww span').forEach(function(w,i){setTimeout(function(){w.classList.add('up')},i*150+280)});
+  setTimeout(function(){document.getElementById('hBot').classList.add('on')},1000);
+  setTimeout(function(){document.getElementById('hScr').classList.add('on')},1200);
+  [1,2,3,4,5].forEach(function(n,i){setTimeout(function(){var el=document.getElementById('ft'+n);if(el)el.classList.add('on')},1400+i*250)});
+}
+
+/* ── SCROLL REVEAL with IntersectionObserver ── */
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e,i){if(e.isIntersecting){setTimeout(function(){e.target.classList.add('on')},i*60);obs.unobserve(e.target)}});
+},{threshold:.12});
+document.querySelectorAll('.rv,.rl,.rr,.stag,.flow-node,.flow-arrow').forEach(function(r){obs.observe(r)});
+
+/* ── DASHBOARD ANIMATIONS ── */
+var dashTriggered=false;
+var dashObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting&&!dashTriggered){
+      dashTriggered=true;
+      /* Animate bars */
+      var bars=document.querySelectorAll('.dash-bar');
+      bars.forEach(function(b,i){
+        setTimeout(function(){
+          b.style.height=b.getAttribute('data-h')+'%';
+          b.classList.add('on');
+        },i*120);
+      });
+      /* Animate sparkline */
+      setTimeout(function(){
+        document.getElementById('sparkPath').classList.add('on');
+        document.getElementById('sparkFill').classList.add('on');
+      },400);
+      /* Count up numbers */
+      animCount('cnt1',0,3,1200,'');
+      animCount('cnt2',0,80,1500,'');
+      animCount('cnt3',0,4,1000,'');
+    }
+  });
+},{threshold:.3});
+var dv=document.getElementById('dashVisual');
+if(dv)dashObs.observe(dv);
+
+function animCount(id,from,to,duration,suffix){
+  var el=document.getElementById(id);if(!el)return;
+  var start=null;
+  function step(ts){
+    if(!start)start=ts;
+    var p=Math.min((ts-start)/duration,1);
+    el.textContent=Math.floor(from+(to-from)*ease(p))+suffix;
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=to+suffix;
+  }
+  requestAnimationFrame(step);
+}
+
+/* ── GLOBE ANIMATIONS ── */
+var globeTriggered=false;
+var globeObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting&&!globeTriggered){
+      globeTriggered=true;
+      var delay=300;
+      /* pop dots */
+      ['gAU','gNZ','gUK','gUS'].forEach(function(id,i){
+        setTimeout(function(){document.getElementById(id).classList.add('on')},delay+i*200);
+      });
+      /* draw lines */
+      setTimeout(function(){
+        ['gl1','gl2','gl3','gl4'].forEach(function(id,i){
+          setTimeout(function(){document.getElementById(id).classList.add('on')},i*300);
+        });
+      },delay+800);
+      /* show labels */
+      setTimeout(function(){
+        ['lbAU','lbNZ','lbUK','lbUS'].forEach(function(id){document.getElementById(id).classList.add('on')});
+      },delay+1600);
+      /* pop market pills */
+      setTimeout(function(){
+        document.querySelectorAll('.mkt-pill').forEach(function(p,i){
+          setTimeout(function(){p.classList.add('on')},i*120);
+        });
+      },delay+600);
+    }
+  });
+},{threshold:.3});
+var gw=document.getElementById('globeWrap');
+if(gw)globeObs.observe(gw);
+
+/* TABS */
+document.querySelectorAll('.tab-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    var idx=b.getAttribute('data-tab');
+    document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});
+    document.querySelectorAll('.tab-panel').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active');
+    var panel=document.querySelector('[data-panel="'+idx+'"]');panel.classList.add('active');
+    panel.querySelectorAll('.rl,.rr').forEach(function(el){el.classList.remove('on');setTimeout(function(){el.classList.add('on')},80)});
+  });
+});
+
+/* PROJECT TILT */
+document.querySelectorAll('.pc').forEach(function(c){
+  c.addEventListener('mousemove',function(e){var r=c.getBoundingClientRect(),nx=((e.clientX-r.left)/r.width-.5)*2,ny=((e.clientY-r.top)/r.height-.5)*2;c.querySelector('.pc-in').style.transform='rotateY('+(nx*7)+'deg) rotateX('+(-ny*5)+'deg) translateZ(10px)'});
+  c.addEventListener('mouseleave',function(){c.querySelector('.pc-in').style.transform='rotateY(0) rotateX(0) translateZ(0)'});
+  c.addEventListener('click',function(){var el=document.querySelector(c.getAttribute('data-href'));if(el)el.scrollIntoView({behavior:'smooth'})});
+});
+
+/* FOOTER PARTICLES */
+var fcanv=document.getElementById('fcanv'),fctx=fcanv.getContext('2d'),fp=[];
+function rfz(){fcanv.width=fcanv.parentElement.offsetWidth;fcanv.height=fcanv.parentElement.offsetHeight}
+rfz();window.addEventListener('resize',rfz);
+for(var fi=0;fi<40;fi++)fp.push({x:Math.random()*4000,y:Math.random()*160+20,s:.6+Math.random()*2,v:.18+Math.random()*.5,a:.06+Math.random()*.2,h:Math.random()>.5?'45,74,62':'74,124,107'});
+(function fd(){fctx.clearRect(0,0,fcanv.width,fcanv.height);fp.forEach(function(p){p.y-=p.v;if(p.y<-8){p.y=fcanv.height+8;p.x=Math.random()*fcanv.width}fctx.beginPath();fctx.arc(p.x,p.y,p.s,0,Math.PI*2);fctx.fillStyle='rgba('+p.h+','+p.a+')';fctx.shadowColor='rgba('+p.h+',.3)';fctx.shadowBlur=6;fctx.fill()});requestAnimationFrame(fd)})();
+
+})();
+</script>
+</body>
+</html>
